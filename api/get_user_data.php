@@ -52,6 +52,13 @@ $stmt_user = $conn_portal->prepare($sql);
 $stmt_user->bind_param("i", $user_id);
 $stmt_user->execute();
 $result_user = $stmt_user->get_result();
+
+// --- CORRECCIÓN 1: Validar que el resultado no sea falso antes de extraer (Evita Fatal Error) ---
+if (!$result_user) {
+    echo json_encode(['success' => false, 'error' => 'Error interno al consultar datos del usuario.']);
+    exit();
+}
+
 $user_data_portal = $result_user->fetch_assoc();
 $stmt_user->close();
 $conn_portal->close();
@@ -77,7 +84,8 @@ if ($force_refresh) {
     unset($_SESSION['dashboard_cache']);
 
     // Uso de Prepared Statements para operaciones sensibles
-    $stmt_del1 = $conn_estado->prepare("DELETE FROM estado_cuenta WHERE TRIM(Asociado) = ?");
+    // --- CORRECCIÓN 2: Se eliminó TRIM() para aprovechar el índice de la tabla ---
+    $stmt_del1 = $conn_estado->prepare("DELETE FROM estado_cuenta WHERE Asociado = ?");
     $stmt_del1->bind_param("s", $identidad);
     $stmt_del1->execute();
     $stmt_del1->close();
@@ -125,9 +133,10 @@ if (!$peticion) {
 } elseif ($peticion['estado'] === 'completado') {
     
     // EXPLICITAR COLUMNAS (Aumenta la velocidad y limita los datos leídos)
+    // --- CORRECCIÓN 2: Se eliminó TRIM() para aprovechar el índice de la tabla ---
     $sql_estado = "SELECT Grupo, Des_Grupo, Principal, saldo, Cuota, Operacion, Descripci, Pagos, N_Cuotas 
                    FROM estado_cuenta 
-                   WHERE TRIM(Asociado) = ?";
+                   WHERE Asociado = ?";
     $stmt_estado = $conn_estado->prepare($sql_estado);
     $stmt_estado->bind_param("s", $identidad);
     $stmt_estado->execute();

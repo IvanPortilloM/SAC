@@ -178,3 +178,4 @@ Stack trace:
 [25-Mar-2026 16:53:49 UTC] PHP Warning:  Undefined array key "identity" in /home1/adiggmhn/public_html/sac/send_reset_link.php on line 33
 [25-Mar-2026 16:56:15 UTC] PHP Warning:  Undefined array key "identity" in /home1/adiggmhn/public_html/sac/send_reset_link.php on line 33
 [25-Mar-2026 20:42:53 UTC] PHP Warning:  Undefined array key "identity" in /home1/adiggmhn/public_html/sac/send_reset_link.php on line 33
+[26-Mar-2026 19:51:06 UTC] PHP Warning:  Undefined array key "identity" in /home1/adiggmhn/public_html/sac/send_reset_link.php on line 33

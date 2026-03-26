@@ -14,7 +14,9 @@ if (!function_exists('loadEnv')) {
             if (strpos($line, '=') !== false) {
                 list($name, $value) = explode('=', $line, 2);
                 $name = trim($name);
-                $value = trim($value);
+                
+                // --- CORRECCIÓN 4: Limpia espacios, saltos de línea y comillas (simples y dobles) ---
+                $value = trim($value, " \t\n\r\0\x0B\"'");
 
                 if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
                     putenv(sprintf('%s=%s', $name, $value));
