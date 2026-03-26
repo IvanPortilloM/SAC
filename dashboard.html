@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADI - Grupo Granjas Marinas - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+    <link rel="apple-touch-icon" href="assets/img/icon-192.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <style>
+        :root { --sidebar-bg: #e0f7fa; --sidebar-hover: #b2ebf2; --sidebar-active: #4169E1; --content-bg: #f8fafc; --card-bg: #ffffff; --text-dark: #1f2937; }
+        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; display: flex; min-height: 100vh; margin: 0; }
+        .sidebar { width: 250px; background-color: var(--sidebar-bg); padding: 1.5rem; display: flex; flex-direction: column; border-right: 1px solid #c0e0e8; box-shadow: 2px 0 5px rgba(0,0,0,0.05); transition: transform 0.3s ease-in-out, width 0.3s ease-in-out; flex-shrink: 0; }
+        .sidebar-item { padding: 0.85rem 1.25rem; border-radius: 0.75rem; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s ease-in-out; display: flex; align-items: center; color: var(--text-dark); font-weight: 500; }
+        .sidebar-item:hover { background-color: var(--sidebar-hover); transform: translateX(4px); }
+        .sidebar-item.active { background-color: var(--sidebar-active); color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(65, 105, 225, 0.3); }
+        .sidebar-item img { margin-right: 1rem; flex-shrink: 0; }
+        .dashboard-content { flex-grow: 1; padding: 1.2rem; background-color: var(--content-bg); overflow-y: auto; }
+        .profile-icon { width: 80px; height: 80px; border-radius: 50%; background-color: #80deea; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 3rem; color: white; flex-shrink: 0; }
+        .progress-bar-container { width: 100%; background-color: #e0e0e0; border-radius: 0.5rem; overflow: hidden; height: 20px; margin-top: 0.5rem; display: flex; }
+        .progress-bar-segment { height: 100%; transition: width 0.5s ease-in-out; color: white; font-weight: bold; font-size: 0.75rem; line-height: 20px; text-align: right; padding-right: 0.5rem; white-space: nowrap; overflow: hidden; }
+        .segment-yellow { background-color: #f1c40f; }
+        .segment-green { background-color: #2ecc71; }
+        .available-credit-text { color: #2ecc71; }
+        .loading-spinner { border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid white; border-radius: 50%; width: 1rem; height: 1rem; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { display: none; }
+            .dashboard-content { padding: 1rem; margin-top: 0; }
+            header.mobile-header { position: sticky; top: 0; z-index: 40; }
+            .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 50; display: flex; justify-content: space-around; padding: 0.5rem; }
+        }
+        .styled-table { border-collapse: separate; border-spacing: 0; margin: 25px auto; font-size: 0.9em; width: 100%; max-width: 600px; overflow: hidden; border-radius: 10px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
+        .styled-table td, .styled-table th { padding: 8px 15px; }
+        .styled-table tr { border-bottom: 1px solid #f0f0f0; }
+        .styled-table tr:last-of-type { border-bottom: 0; }
+        .styled-table tr td:first-child { font-weight: 600; color: #555; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 1rem; }
+        .modal-content { background-color: var(--card-bg); padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); width: 100%; max-width: 900px; max-height: 90vh; display: flex; flex-direction: column; position: relative; }
+        .modal-close-btn { position: absolute; top: 0.75rem; right: 0.75rem; background-color: #f1f5f9; border: none; border-radius: 9999px; cursor: pointer; color: var(--text-dark); width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s ease; }
+        .modal-table-container { overflow-y: auto; }
+        .modal-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .modal-table th, .modal-table td { padding: 0.75rem; border: 1px solid #e2e8f0; text-align: left; font-size: 0.875rem; }
+        .modal-table th { background-color: var(--sidebar-bg); font-weight: 600; top: 0; position: sticky; }
+        #news-section::-webkit-scrollbar { width: 8px; }
+        #news-section::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        #news-section::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        #news-section::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+    </style>
+</head>
+<body>
+
+    <header class="mobile-header bg-white shadow-sm flex justify-between items-center px-4 py-3 md:hidden">
+        <div class="flex items-center">
+            <img src="/sac/LOGO ADI-GGM.png" alt="Logo" class="h-8 w-auto mr-2">
+            <span class="text-lg font-bold text-gray-800">Portal SAC</span>
+        </div>
+        <div class="flex items-center">
+            <div class="relative mr-4" id="notif-btn-mobile">
+                <button class="text-gray-600 focus:outline-none"><span class="text-2xl">🔔</span></button>
+                <span id="notif-badge-mobile" class="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center hidden">0</span>
+                <div id="notif-dropdown-mobile" class="absolute right-0 top-10 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 hidden z-50 overflow-hidden">
+                    <div class="p-3 bg-blue-600 text-white font-bold flex justify-between items-center">
+                        <span>Notificaciones</span><button class="mark-all-read-btn text-xs bg-blue-700 px-2 py-1 rounded hover:bg-blue-800">Marcar leídas</button>
+                    </div>
+                    <div id="notif-list-mobile" class="max-h-64 overflow-y-auto bg-gray-50"><p class="text-center text-gray-500 py-4 text-sm">Cargando...</p></div>
+                </div>
+            </div>
+            <button id="btn-profile-mobile" class="text-gray-600 hover:text-blue-600 focus:outline-none p-2 rounded-full hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="mobile-nav md:hidden">
+        <div class="sidebar-item active" data-view="home"><img src="home_icon.png" alt="Inicio" class="h-6 w-6"></div>
+        <div class="sidebar-item" data-view="loans"><img src="calculator_icon.png" alt="Préstamos" class="h-6 w-6"></div>
+        <div class="sidebar-item" data-view="beneficios"><img src="cash_icon.png" alt="Beneficios" class="h-6 w-6"></div>
+        <div class="sidebar-item" id="btn-faqs-mobile">
+             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        </div>
+        <div class="sidebar-item" id="logout-btn-mobile"><img src="logout_icon.png" alt="Salir" class="h-6 w-6"></div>
+    </div>
+
+    <div class="sidebar hidden md:flex">
+        <div class="flex items-center mb-8 sidebar-header">
+            <img src="/sac/LOGO ADI-GGM.png" alt="Logo" class="mr-3 w-12 h-auto">
+            <span class="text-xl font-bold text-gray-800">ADI - GGM</span>
+        </div>
+        <div class="profile-icon">👤</div>
+        <p id="dashboard-user-name" class="text-center font-semibold text-gray-800 mb-8">Cargando...</p>
+        
+        <div class="sidebar-item active" data-view="home"><img src="home_icon.png" alt="Inicio" class="h-6 w-6"><span>Inicio</span></div>
+        <div class="sidebar-item" data-view="loans"><img src="calculator_icon.png" alt="Préstamos" class="h-6 w-6"><span>Préstamos</span></div>
+        <div class="sidebar-item" data-view="beneficios"><img src="cash_icon.png" alt="Beneficios" class="h-6 w-6"><span>Beneficios</span></div>
+        <div class="sidebar-item" id="btn-profile-sidebar"><span class="text-2xl mr-4 leading-none">👤</span><span>Mi Perfil</span></div>
+        <div class="sidebar-item" id="btn-faqs-sidebar"><span class="text-2xl mr-4 leading-none">❓</span><span>Ayuda / Trámites</span></div>
+        <div class="sidebar-item hidden bg-gray-800 text-white hover:bg-gray-700" id="btn-admin-sidebar"><span class="text-2xl mr-4 leading-none">🛠️</span><span>Panel Admin</span></div>
+        <div class="mt-auto sidebar-item" id="logout-btn-desktop"><img src="logout_icon.png" alt="Cerrar Sesión" class="h-6 w-6"><span>Cerrar Sesión</span></div>
+    </div>
+
+    <div class="dashboard-content pb-20 md:pb-0">
+        
+        <div id="home-content" class="content-view">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 id="welcome-message" class="text-2xl md:text-3xl font-bold text-gray-800">Bienvenido</h1>
+                    <span class="text-gray-600 text-sm">Saldos a la Fecha: <span id="current-date-time"></span></span>
+                </div>
+                
+                <div class="relative hidden md:block" id="notif-btn-desktop">
+                    <button class="p-2 bg-white rounded-full shadow hover:bg-gray-50 focus:outline-none relative">
+                        <span class="text-2xl">🔔</span>
+                        <span id="notif-badge-desktop" class="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center transform translate-x-1 -translate-y-1 hidden">0</span>
+                    </button>
+                    <div id="notif-dropdown-desktop" class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 hidden z-50 overflow-hidden">
+                        <div class="p-3 bg-blue-600 text-white font-bold flex justify-between items-center">
+                            <span>Notificaciones</span><button class="mark-all-read-btn text-xs bg-blue-700 px-2 py-1 rounded hover:bg-blue-800">Marcar leídas</button>
+                        </div>
+                        <div id="notif-list-desktop" class="max-h-64 overflow-y-auto bg-gray-50"><p class="text-center text-gray-500 py-4 text-sm">Cargando...</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-md mb-8">
+                <p class="text-gray-600 text-lg mb-2"><span id="dashboard-user-name-main">Cargando...</span></p>
+                
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <h2 class="text-3xl md:text-4xl font-bold available-credit-text">Crédito Disponible: L <span id="available-credit" class="saldo-privado">0.00</span></h2>
+                    <button id="btn-toggle-privacy" class="text-gray-400 hover:text-blue-600 focus:outline-none transition-colors" title="Ocultar/Mostrar Saldos">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
+                </div>                
+
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-4 mb-2 space-y-2 sm:space-y-0">
+                    <span class="text-lg font-semibold text-blue-600">Ahorros Patrimoniales: L <span id="total-savings" class="saldo-privado">0.00</span></span>
+                    <span class="text-lg font-semibold text-yellow-600">Créditos: L <span id="total-credits" class="saldo-privado">0.00</span></span>
+                </div>
+                
+                <div class="progress-bar-container">
+                    <div id="credits-progress-bar-segment" class="progress-bar-segment segment-yellow"></div>
+                    <div id="available-progress-bar-segment" class="progress-bar-segment segment-green"></div>
+                </div>
+                <p class="text-gray-600 text-sm text-center mt-2">Crédito: <span id="credits-percentage">0.00%</span> / Disponible: <span id="available-percentage">0.00%</span></p>
+
+                <div id="data-status-message" class="mt-4 p-3 rounded-md text-center hidden"></div>
+
+                <div class="flex justify-center mt-6">
+                    <button id="refresh-data-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="refresh-button-text">Actualizar Información</span>
+                        <div id="refresh-spinner" class="hidden loading-spinner ml-2"></div>
+                    </button>
+                    <button id="download-pdf-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 flex items-center ml-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        Descargar PDF
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl shadow-md cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group flex flex-col items-center justify-center h-48 border-b-4 border-blue-500" id="savings-card">
+                    <div class="bg-blue-50 p-4 rounded-full mb-3 group-hover:bg-blue-100 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                    <h3 class="text-xl font-bold text-gray-700 group-hover:text-blue-600 transition-colors">Ahorros Patrimoniales</h3>
+                    <p class="text-xs text-gray-400 mt-2">Ver Detalle</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-md cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group flex flex-col items-center justify-center h-48 border-b-4 border-green-500" id="voluntary-savings-card">
+                    <div class="bg-green-50 p-4 rounded-full mb-3 group-hover:bg-green-100 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg></div>
+                    <h3 class="text-xl font-bold text-gray-700 group-hover:text-green-600 transition-colors">Ahorro Navideño</h3>
+                    <p class="text-xs text-gray-400 mt-2">Ver Detalle</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-md cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group flex flex-col items-center justify-center h-48 border-b-4 border-yellow-500" id="credits-card">
+                    <div class="bg-yellow-50 p-4 rounded-full mb-3 group-hover:bg-yellow-100 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div>
+                    <h3 class="text-xl font-bold text-gray-700 group-hover:text-yellow-600 transition-colors">Créditos</h3>
+                    <p class="text-xs text-gray-400 mt-2">Ver Detalle</p>
+                </div>
+            </div>
+
+            <div id="news-section" class="mb-8 hidden max-h-[600px] overflow-y-auto pr-2 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">📢 Comunicados Recientes</h2>
+                <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4"></div>
+            </div>
+
+            <div class="w-full bg-transparent rounded-2xl overflow-hidden shadow-sm mb-8 relative group h-48 md:h-64">
+                <div id="ads-track" class="flex transition-transform duration-700 ease-in-out h-full">
+                    <div class="min-w-full h-full relative">
+                        <img src="assets/img/slides/dashboard-feria.jpg" class="w-full h-full object-cover" alt="Utiles">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6"><h2 class="text-white text-2xl font-bold">¡Prepara el regreso a clases con nosotros!</h2></div>
+                    </div>
+                    <div class="min-w-full h-full relative">
+                        <img src="assets/img/slides/dashboard-temporada.jpg" class="w-full h-full object-cover" alt="Temporada">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6"><h2 class="text-white text-2xl font-bold">Aprovecha nuestros precios de temporada.</h2></div>
+                    </div>
+                    <div class="min-w-full h-full relative">
+                        <img src="assets/img/slides/dashboard-asamblea.jpg" class="w-full h-full object-cover" alt="Asamblea">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6"><h2 class="text-white text-2xl font-bold">Recuerda asistir a nuestra Asamblea General.</h2></div>
+                    </div>
+                </div>
+                <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+                    <div class="h-2 w-2 rounded-full bg-white opacity-100 shadow-sm"></div>
+                    <div class="h-2 w-2 rounded-full bg-white/50 shadow-sm"></div>
+                    <div class="h-2 w-2 rounded-full bg-white/50 shadow-sm"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loans-content" class="content-view hidden">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6">Simulador de Préstamos</h1>
+            <div class="bg-white p-6 rounded-2xl shadow-md mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tipo de Solicitud</label>
+                            <select id="loan-type" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg">
+                                <option value="PRÉSTAMO">PRÉSTAMO</option>
+                                <option value="PRESTAMITO">PRESTAMITO</option>
+                                <option value="REFINANCIAMIENTO">REFINANCIAMIENTO</option>
+                                <option value="RETIRO PARCIAL">RETIRO PARCIAL</option>
+                                <option value="NETEO DE DEUDAS">NETEO DE DEUDAS</option>
+                                <option value="NETEO DE PRÉSTAMO">NETEO DE PRÉSTAMO</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Motivo</label>
+                            <select id="loan-reason" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg">
+                                <option value="OTRAS NECESIDADES">OTRAS NECESIDADES</option>
+                                <option value="VIVIENDA">VIVIENDA</option>
+                                <option value="EDUCACIÓN">EDUCACIÓN</option>
+                                <option value="MEDICINA">MEDICINA</option>
+                                <option value="TERRENOS">TERRENOS</option>
+                                <option value="COMPRA Y REPARACIÓN DE VEHÍCULOS">VEHÍCULO</option>
+                                <option value="READECUACIÓN">READECUACIÓN</option>
+                                <option value="NETEO">NETEO</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="refinance-section" class="hidden col-span-1 md:col-span-2 lg:col-span-4 mt-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <h4 class="font-bold text-sm text-blue-900 mb-2">Selecciona préstamos a cancelar:</h4>
+                        <div class="overflow-y-auto max-h-40 bg-white border rounded">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-100 text-gray-700">
+                                    <tr><th class="p-2 text-center">✔</th><th class="p-2 text-left">Descripción</th><th class="p-2 text-right">Saldo</th></tr>
+                                </thead>
+                                <tbody id="refinance-table-body"></tbody>
+                            </table>
+                        </div>
+                        <div class="text-right mt-2 font-bold text-red-600">Total a Deducir: <span id="refinance-total">L 0.00</span></div>
+                    </div>
+                    <div>
+                        <label for="loan-amount" class="block text-sm font-medium text-gray-700">Monto del Préstamo (L)</label>
+                        <input type="number" id="loan-amount" placeholder="Ej: 10000" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg">
+                    </div>
+                    <div>
+                        <label for="interest-rate" class="block text-sm font-medium text-gray-700">Tasa de Interés Anual (%)</label>
+                        <select id="interest-rate" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg">
+                            <option value="12">12%</option>
+                            <option value="14" selected>14%</option>
+                            <option value="16">16%</option>
+                            <option value="18">18%</option>
+                            <option value="custom">Otra (editar)</option>
+                        </select>
+                        <input type="number" id="interest-rate-custom" class="hidden mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg" value="14">
+                    </div>
+                    <div>
+                        <label for="capitalizations" class="block text-sm font-medium text-gray-700">Pagos por Año</label>
+                        <select id="capitalizations" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg">
+                            <option value="12">12 (Mensual)</option>
+                            <option value="24" selected>24 (Quincenal)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="installments" class="block text-sm font-medium text-gray-700">Nº de Cuotas (Pagos)</label>
+                        <input type="number" id="installments" placeholder="Ej: 24" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg">
+                        <p class="text-xs text-gray-500 mt-1">Sugeridas: <span id="suggested-installments" class="font-bold">0</span></p>
+                    </div>
+                </div>
+                <div class="flex justify-center mt-6">
+                    <button id="calculate-loan-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">Calcular Amortización</button>
+                </div>
+            </div>
+            
+            <div id="loan-results" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Resumen del Préstamo</h2>
+                    <button id="btn-export-csv" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 flex items-center text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        Exportar a Excel
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
+                    <div class="bg-blue-50 p-4 rounded-xl shadow-sm"><p class="text-sm font-medium text-blue-800">Monto del Préstamo</p><p id="summary-amount" class="text-2xl font-bold text-blue-900">L 0.00</p></div>
+                    <div class="bg-red-50 p-4 rounded-xl shadow-sm"><p class="text-sm font-medium text-red-800">Total de Intereses</p><p id="summary-interest" class="text-2xl font-bold text-red-900">L 0.00</p></div>
+                    <div class="bg-green-50 p-4 rounded-xl shadow-sm"><p class="text-sm font-medium text-green-800">Total a Pagar</p><p id="summary-total" class="text-2xl font-bold text-green-900">L 0.00</p></div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4 md:mb-0">Cuota Nivelada Estimada: <span id="summary-payment" class="text-blue-600 font-bold text-2xl">L 0.00</span></h3>
+                    <button id="btn-request-loan" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
+                        <span class="mr-2 text-xl">📝</span> Solicitar este Préstamo
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden mt-4">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Cuota</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Fecha</th>
+                                    <th class="px-6 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Pago</th>
+                                    <th class="px-6 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Intereses</th>
+                                    <th class="px-6 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Capital</th>
+                                    <th class="px-6 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Saldo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="amortization-table-body" class="divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="beneficios-content" class="content-view hidden">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6">Consulta de Beneficios Anuales</h1>
+            <div class="bg-white p-6 rounded-2xl shadow-md mb-8">
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <div>
+                        <label for="beneficios-anio" class="block text-sm font-medium text-gray-700">Seleccione el Año</label>
+                        <select id="beneficios-anio" name="anio" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg">
+                        </select>
+                    </div>
+                    <div class="flex gap-4 mt-4 sm:mt-0 sm:self-end">
+                         <button id="btn-consulta-excedentes" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300">Consultar Excedentes</button>
+                        <button id="btn-consulta-rifa" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300">Ver Números de Rifa</button>
+                    </div>
+                </div>
+            </div>
+            <div id="resultado-beneficios" class="bg-white p-6 rounded-2xl shadow-md min-h-[200px] flex items-center justify-center"><p class="text-center text-gray-500">Seleccione un año y una consulta para ver los resultados.</p></div>
+        </div>
+    </div>
+
+    <div id="detail-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="document.getElementById('detail-modal').classList.add('hidden')"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            <h2 id="modal-title" class="text-2xl font-bold text-gray-800 mb-4"></h2>
+            <div id="modal-table-content" class="modal-table-container"></div>
+        </div>
+    </div>
+
+    <div id="faq-modal" class="modal-overlay hidden">
+        <div class="modal-content max-w-2xl bg-white">
+            <div class="flex justify-between items-center mb-4 border-b pb-2"><h2 class="text-2xl font-bold text-gray-800">Ayuda y Trámites</h2><button onclick="document.getElementById('faq-modal').classList.add('hidden')" class="text-gray-500 hover:text-red-500 text-2xl">&times;</button></div>
+            <div id="faq-list" class="space-y-3 overflow-y-auto max-h-[60vh] pr-2"><p class="text-center text-gray-500">Cargando...</p></div>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-100 max-h-[90vh] overflow-y-auto">
+            <div class="bg-blue-600 px-6 py-4 flex justify-between items-center"><h2 class="text-xl font-bold text-white">Mi Perfil</h2><button id="close-profile-modal" class="text-white hover:text-gray-200 focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div>
+            <div class="p-6">
+                <form id="profile-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label><input type="text" id="profile-nombre" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-500 cursor-not-allowed" disabled></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Identidad</label><input type="text" id="profile-identidad" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-500 cursor-not-allowed" disabled></div>
+                    </div>
+                    <div><label for="profile-email" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label><input type="email" id="profile-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"></div>
+                    <div><label for="profile-telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono / Celular</label><input type="tel" id="profile-telefono" placeholder="Ej: 9999-9999" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"></div>
+                    <div><label for="profile-direccion" class="block text-sm font-medium text-gray-700 mb-1">Dirección de Domicilio</label><textarea id="profile-direccion" rows="3" placeholder="Colonia, Calle, Número de casa..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"></textarea></div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5">Guardar Datos Personales</button>
+                </form>
+                <div class="my-6 border-t border-gray-200"></div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">🔒 Seguridad <button type="button" onclick="document.getElementById('security-form-container').classList.toggle('hidden')" class="text-sm text-blue-600 hover:underline font-normal">(Cambiar Contraseña)</button></h3>
+                    <div id="security-form-container" class="hidden bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <form id="password-form" class="space-y-3">
+                            <div><label class="block text-sm font-medium text-gray-700">Contraseña Actual</label><input type="password" id="current-password" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 border-gray-300"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Nueva Contraseña</label><input type="password" id="new-password" required minlength="6" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 border-gray-300"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Confirmar Nueva Contraseña</label><input type="password" id="confirm-password" required minlength="6" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 border-gray-300"></div>
+                            <button type="submit" class="w-full bg-gray-800 hover:bg-black text-white font-bold py-2 rounded-lg transition">Actualizar Contraseña</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js?v=12"></script>
+</body>
+</html>

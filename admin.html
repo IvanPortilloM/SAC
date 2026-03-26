@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - SAC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }</style>
+</head>
+<body class="p-6">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-gray-800 p-6 flex justify-between items-center text-white">
+            <h1 class="text-2xl font-bold">🛠️ Panel de Administración</h1>
+            <a href="dashboard.html" class="text-gray-300 hover:text-white text-sm">← Volver al Portal</a>
+        </div>
+
+        <div class="flex border-b">
+            <button onclick="switchTab('news')" id="tab-news" class="flex-1 py-4 text-center font-bold text-blue-600 border-b-2 border-blue-600 bg-blue-50 focus:outline-none transition">
+                📢 Noticias
+            </button>
+            <button onclick="switchTab('notif')" id="tab-notif" class="flex-1 py-4 text-center font-bold text-gray-500 hover:bg-gray-50 focus:outline-none transition">
+                🔔 Notificaciones
+            </button>
+            <button onclick="switchTab('faq')" id="tab-faq" class="flex-1 py-4 text-center font-bold text-gray-500 hover:bg-gray-50 focus:outline-none transition">
+                ❓ FAQs (Ayuda)
+            </button>
+        </div>
+
+        <div class="p-6">
+            <div id="view-news">
+                <h2 class="text-xl font-bold mb-4 text-gray-700">Nueva Noticia / Comunicado</h2>
+                <form id="form-news" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Título</label>
+                        <input type="text" id="news-title" required class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Contenido</label>
+                        <textarea id="news-content" rows="5" required class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Usa <b>negrita</b> para resaltar..."></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">URL Imagen (Opcional)</label>
+                            <input type="text" id="news-img" class="w-full mt-1 p-2 border rounded-lg" placeholder="assets/img/slides/foto.jpg">
+                        </div>
+                        <div class="flex items-center mt-6">
+                            <input type="checkbox" id="news-important" class="h-5 w-5 text-blue-600">
+                            <label for="news-important" class="ml-2 text-gray-700 font-medium">Marcar como Importante</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition">Publicar Noticia</button>
+                </form>
+            </div>
+
+            <div id="view-notif" class="hidden">
+                <h2 class="text-xl font-bold mb-4 text-gray-700">Enviar Notificación Push</h2>
+                <form id="form-notif" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Destinatario</label>
+                        <select id="notif-user" class="w-full mt-1 p-2 border rounded-lg bg-white">
+                            <option value="all">📢 ENVIAR A TODOS (Global)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Título Corto</label>
+                        <input type="text" id="notif-title" required class="w-full mt-1 p-2 border rounded-lg" placeholder="Ej: Aviso Importante">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Mensaje</label>
+                        <textarea id="notif-message" rows="3" required class="w-full mt-1 p-2 border rounded-lg" placeholder="Mensaje para el usuario..."></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow transition">Enviar Notificación</button>
+                </form>
+            </div>
+
+            <div id="view-faq" class="hidden">
+                <h2 class="text-xl font-bold mb-4 text-gray-700">Nueva Pregunta Frecuente</h2>
+                <form id="form-faq" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Categoría</label>
+                            <select id="faq-category" class="w-full mt-1 p-2 border rounded-lg bg-white">
+                                <option value="General">General</option>
+                                <option value="Préstamos">Préstamos</option>
+                                <option value="Ahorros">Ahorros</option>
+                                <option value="Afiliación">Afiliación</option>
+                                <option value="Beneficios">Beneficios</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Orden (Prioridad)</label>
+                            <input type="number" id="faq-order" value="0" class="w-full mt-1 p-2 border rounded-lg">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Pregunta</label>
+                        <input type="text" id="faq-question" required class="w-full mt-1 p-2 border rounded-lg" placeholder="¿Cómo hago para...?">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Respuesta</label>
+                        <textarea id="faq-answer" rows="4" required class="w-full mt-1 p-2 border rounded-lg" placeholder="Pasos a seguir..."></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg shadow transition">Guardar Pregunta</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script>
+        function switchTab(tab) {
+            // Ocultar todo
+            ['news', 'notif', 'faq'].forEach(t => {
+                document.getElementById('view-' + t).classList.add('hidden');
+                document.getElementById('tab-' + t).className = "flex-1 py-4 text-center font-bold text-gray-500 hover:bg-gray-50 focus:outline-none transition";
+            });
+            // Mostrar seleccionado
+            document.getElementById('view-' + tab).classList.remove('hidden');
+            
+            // Colores por tab
+            const colors = { 'news': 'blue', 'notif': 'green', 'faq': 'purple' };
+            const color = colors[tab];
+            
+            document.getElementById('tab-' + tab).className = `flex-1 py-4 text-center font-bold text-${color}-600 border-b-2 border-${color}-600 bg-${color}-50 focus:outline-none transition`;
+        }
+    </script>
+</body>
+</html>

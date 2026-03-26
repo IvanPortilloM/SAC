@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADI - Grupo Granjas Marinas - Iniciar Sesión</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+    <link rel="apple-touch-icon" href="assets/img/icon-192.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1rem; }
+        .container-wrapper { display: flex; background-color: #ffffff; border-radius: 1rem; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); overflow: hidden; width: 100%; max-width: 900px; min-height: 550px; }
+        .right-panel { flex: 1; padding: 2.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .button-primary { background-color: #FF7F00; color: #ffffff; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 600; transition: background-color 0.3s ease; cursor: pointer; border: none; }
+        .button-primary:hover { background-color: #E67300; }
+        .button-primary:disabled { background-color: #ccc; cursor: not-allowed; }
+        .button-secondary { background-color: #E0E7FF; color: #4169E1; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 600; transition: background-color 0.3s ease, color 0.3s ease; border: none; }
+        .button-secondary:hover { background-color: #C7D2FE; color: #3558B6; }
+        .text-link { color: #4169E1; }
+        .text-link:hover { text-decoration: underline; }
+        .input-field { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem; color: #1f2937; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .input-field:focus { outline: none; border-color: #4169E1; box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.2); }
+        .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.7); }
+        @media (max-width: 768px) { .container-wrapper { flex-direction: column; min-height: auto; } .left-panel { display: none !important; } .right-panel { padding: 1.5rem; } }
+    </style>
+</head>
+<body>
+    <div class="container-wrapper">
+        <div class="left-panel flex-1 relative overflow-hidden hidden md:flex items-end justify-start p-8 text-white">
+            <div id="login-carousel" class="absolute inset-0 w-full h-full z-0">
+                <div class="absolute inset-0 w-full h-full transition-opacity duration-1000 opacity-100 login-slide" style="background-image: url('assets/img/slides/login-mision-vision.jpg'); background-size: cover; background-position: center;"></div>
+                <div class="absolute inset-0 w-full h-full transition-opacity duration-1000 opacity-0 login-slide" style="background-image: url('assets/img/slides/login-feria.jpg'); background-size: cover; background-position: center;"></div>
+                <div class="absolute inset-0 w-full h-full transition-opacity duration-1000 opacity-0 login-slide" style="background-image: url('assets/img/slides/login-asamblea.jpg'); background-size: cover; background-position: center;"></div>
+                <div class="absolute inset-0 bg-black/30"></div>
+            </div>
+            <div class="relative z-10">
+                <h2 class="text-3xl font-bold mb-2 text-shadow">ADI - GGM</h2>
+                <p class="text-lg text-shadow">Construyendo tu futuro con beneficios exclusivos.</p>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <img src="LOGO ADI-GGM.png" alt="ADI - Grupo Granjas Marinas Logo" class="mb-6 w-40 h-auto">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6">Iniciar Sesión</h1>
+
+            <form id="login-form" class="space-y-4 w-full max-w-xs">
+                <div>
+                    <input type="text" id="identity_number" name="identity_number" placeholder="Número de Identidad" 
+                           class="input-field" 
+                           maxlength="13" 
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+                           pattern="\d{13}" 
+                           title="Ingrese exactamente 13 números, sin guiones ni letras" required>
+                </div>
+                <div class="relative">
+                    <input type="password" id="password" name="password" placeholder="Contraseña" class="input-field pr-10" required>
+                    <span class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer" onclick="togglePasswordVisibility('password')">
+                        <svg class="h-5 w-5 text-gray-500 hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </span>
+                </div>
+                <button type="submit" id="btn-login" class="button-primary w-full shadow-md">Iniciar sesión</button>
+            </form>
+
+            <button id="create-account-btn" class="button-secondary w-full max-w-xs mt-4" onclick="window.location.href='register.html'">Crear Usuario</button>
+            <a href="forgot_password.html" class="text-link text-sm mt-4 block font-medium">¿Olvidaste tu contraseña?</a>
+
+            <div id="login-status" class="mt-4 text-center"></div>
+        </div>
+    </div>
+
+    <script>
+        function togglePasswordVisibility(fieldId) {
+            const field = document.getElementById(fieldId);
+            field.type = field.type === "password" ? "text" : "password";
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('api/get_user_data.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = 'dashboard.html';
+                    }
+                })
+                .catch(err => console.log("Sesión no activa, mostrando login."));
+
+            const slides = document.querySelectorAll('.login-slide');
+            let currentSlide = 0;
+            if (slides.length > 0) {
+                setInterval(() => {
+                    slides[currentSlide].classList.remove('opacity-100');
+                    slides[currentSlide].classList.add('opacity-0');
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    slides[currentSlide].classList.remove('opacity-0');
+                    slides[currentSlide].classList.add('opacity-100');
+                }, 4000);
+            }
+
+            const loginForm = document.getElementById('login-form');
+            const statusDiv = document.getElementById('login-status');
+            const btnLogin = document.getElementById('btn-login');
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                btnLogin.disabled = true;
+                btnLogin.textContent = 'Verificando...';
+                statusDiv.textContent = '';
+
+                const identity = document.getElementById('identity_number').value;
+                const password = document.getElementById('password').value;
+
+                try {
+                    const response = await fetch('process_login.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ identity: identity, password: password })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        statusDiv.className = 'mt-4 text-center text-green-600 font-bold';
+                        statusDiv.textContent = '¡Bienvenido! Redirigiendo...';
+                        setTimeout(() => { window.location.href = data.redirect || 'dashboard.html'; }, 1000);
+                    } else {
+                        throw new Error(data.error || 'Error desconocido');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    statusDiv.className = 'mt-4 text-center text-red-500 font-bold';
+                    statusDiv.textContent = error.message;
+                    btnLogin.disabled = false;
+                    btnLogin.textContent = 'Iniciar sesión';
+                }
+            });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('status') === 'session_expired') {
+                statusDiv.textContent = 'Tu sesión ha expirado.';
+                statusDiv.className = 'mt-4 text-center text-yellow-600 font-bold';
+            }
+        });
+
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const yaRechazo = localStorage.getItem('pwa_rechazada');
+            if (!yaRechazo) mostrarNotificacionInstalar();
+        });
+
+        function mostrarNotificacionInstalar() {
+            const div = document.createElement('div');
+            div.className = 'fixed bottom-4 left-4 right-4 bg-white p-4 rounded-lg shadow-xl border border-blue-100 z-50 flex flex-col gap-3';
+            div.style.maxWidth = '400px';
+            div.style.margin = '0 auto';
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-100 p-2 rounded-lg"><span class="text-2xl">📱</span></div>
+                    <div>
+                        <h4 class="font-bold text-gray-800">Instalar App</h4>
+                        <p class="text-xs text-gray-600">Acceso rápido sin navegador.</p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button id="btn-install" class="flex-1 bg-blue-600 text-white py-2 rounded text-sm font-bold shadow hover:bg-blue-700">Instalar</button>
+                    <button id="btn-cancel" class="flex-1 bg-gray-100 text-gray-600 py-2 rounded text-sm font-medium hover:bg-gray-200">Ahora no</button>
+                </div>
+            `;
+            document.body.appendChild(div);
+
+            document.getElementById('btn-install').addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                }
+                div.remove();
+            });
+            document.getElementById('btn-cancel').addEventListener('click', () => {
+                localStorage.setItem('pwa_rechazada', 'true');
+                div.remove();
+            });
+        }
+    </script>
+</body>
+</html>

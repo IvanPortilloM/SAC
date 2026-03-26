@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADI - Grupo Granjas Marinas - Registrarse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+    <link rel="apple-touch-icon" href="assets/img/icon-192.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1rem; }
+        .container-wrapper { display: flex; background-color: #ffffff; border-radius: 1rem; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); overflow: hidden; width: 100%; max-width: 900px; min-height: 600px; }
+        .left-panel { flex: 1; background-image: url('https://placehold.co/450x600/4169E1/FFFFFF?text=Únete+a+ADI+GGM'); background-size: cover; background-position: center; }
+        .right-panel { flex: 1; padding: 2.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .button-primary { background-color: #FF7F00; color: #ffffff; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 600; transition: background-color 0.3s ease; }
+        .button-primary:hover { background-color: #E67300; }
+        .button-secondary { background-color: #E0E7FF; color: #4169E1; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 600; transition: background-color 0.3s ease, color 0.3s ease; }
+        .button-secondary:hover { background-color: #C7D2FE; color: #3558B6; }
+        .input-field { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem; color: #1f2937; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .input-field:focus { outline: none; border-color: #4169E1; box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.2); }
+        .hidden { display: none !important; }
+        .tab-active { border-bottom: 2px solid #FF7F00; color: #FF7F00; font-weight: 600; }
+        .tab-inactive { color: #6b7280; }
+
+        /* Estilos Cámara */
+        #camera-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #camera-feed { width: 100%; height: 100%; object-fit: cover; }
+        .camera-guide-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; }
+        #camera-guide-box { width: 85vw; max-width: 480px; aspect-ratio: 85.6 / 53.98; border: 3px solid white; border-radius: 15px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); }
+        #selfie-guide-oval { width: 75vw; max-width: 350px; aspect-ratio: 3 / 4.2; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); }
+        #camera-controls { position: absolute; bottom: 2rem; display: flex; gap: 1rem; z-index: 1001; }
+        .camera-button { padding: 1rem; border-radius: 50%; border: 3px solid white; cursor: pointer; background-color: rgba(255, 255, 255, 0.2); font-size: 1.5rem; }
+
+        @media (max-width: 768px) {
+            .container-wrapper { flex-direction: column; max-width: 100%; min-height: auto; }
+            .left-panel { display: none; }
+            .right-panel { width: 100%; padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-wrapper">
+        <div class="left-panel"></div>
+
+        <div class="right-panel">
+            <img src="LOGO ADI-GGM.png" alt="Logo" class="mb-6 w-40 h-auto">
+            <h1 class="text-2xl font-bold text-gray-800 mb-4">Crear Cuenta</h1>
+
+            <div id="auth-tabs" class="flex border-b w-full max-w-sm mb-6">
+                <button id="tab-auto" class="flex-1 pb-2 text-center tab-active" onclick="switchTab('auto')">Escaneo ID</button>
+                <button id="tab-manual" class="flex-1 pb-2 text-center tab-inactive" onclick="switchTab('manual')">Registro Manual</button>
+            </div>
+
+            <div id="registration-views-container" class="w-full max-w-sm">
+
+                <div id="step-1-identity-verification" class="view">
+                    <p class="text-sm text-gray-500 mb-4">Escanea tu identidad para llenar los datos automáticamente.</p>
+                    <form id="identity-verification-form" class="space-y-6">
+                        
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2 text-left">
+                                1. Frente de la Identidad
+                            </label>
+                            <div class="flex items-center gap-3">
+                                <button type="button" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md flex items-center justify-center gap-2 transition-all" onclick="openCamera('imagen_id')">
+                                    <span class="text-xl">📸</span> 
+                                    <span>Tomar Foto</span>
+                                </button>
+                                <label class="cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-600 py-3 px-4 rounded-lg flex items-center justify-center transition-all" title="Subir desde galería">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    <input type="file" id="imagen_id" name="imagen_id" accept="image/jpeg, image/png" class="hidden" required onchange="updateFileAndPreview('idFileName', 'idImagePreview', this)">
+                                </label>
+                            </div>
+                            <div class="mt-2 flex items-center justify-between text-sm text-gray-500">
+                                <span id="idFileName" class="truncate max-w-[200px]">Sin archivo seleccionado</span>
+                            </div>
+                            <img id="idImagePreview" class="hidden mt-2 w-full h-40 object-contain bg-gray-100 rounded-lg border border-gray-200">
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2 text-left">
+                                2. Tu Selfie (Rostro)
+                            </label>
+                            <div class="flex items-center gap-3">
+                                <button type="button" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md flex items-center justify-center gap-2 transition-all" onclick="openCamera('selfie')">
+                                    <span class="text-xl">🤳</span> 
+                                    <span>Tomar Selfie</span>
+                                </button>
+                                <label class="cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-600 py-3 px-4 rounded-lg flex items-center justify-center transition-all" title="Subir desde galería">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    <input type="file" id="selfie" name="selfie" accept="image/jpeg, image/png" class="hidden" required onchange="updateFileAndPreview('selfieFileName', 'selfieImagePreview', this)">
+                                </label>
+                            </div>
+                            <div class="mt-2 flex items-center justify-between text-sm text-gray-500">
+                                <span id="selfieFileName" class="truncate max-w-[200px]">Sin archivo seleccionado</span>
+                            </div>
+                            <img id="selfieImagePreview" class="hidden mt-2 w-full h-40 object-contain bg-gray-100 rounded-lg border border-gray-200">
+                        </div>
+
+                        <button type="submit" class="button-primary w-full shadow-lg">Verificar Identidad</button>
+                    </form>
+                    <div id="identity-verification-status" class="mt-4 text-center"></div>
+                </div>
+
+                <div id="step-1-manual-registration" class="view hidden">
+                    <p class="text-sm text-gray-500 mb-4">Ingresa tus datos tal como aparecen en tu DNI.</p>
+                    <form id="manual-registration-form" class="space-y-4">
+                        <div>
+                            <input type="text" id="manual-nombres" placeholder="Nombres" class="input-field" required>
+                        </div>
+                        <div>
+                            <input type="text" id="manual-apellidos" placeholder="Apellidos" class="input-field" required>
+                        </div>
+                        
+                        <div class="relative">
+                            <input type="text" id="manual-identidad" placeholder="Número de Identidad (Sin guiones)" class="input-field pl-10" required>
+                            <button type="button" class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 hover:text-blue-600" title="Escanear Código de Barras" onclick="scanBarcode()">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-gray-500 block text-left mb-1">Fecha de Nacimiento</label>
+                            <input type="date" id="manual-fecha-nacimiento" class="input-field">
+                        </div>
+                        
+                        <button type="submit" class="button-primary w-full">Continuar</button>
+                    </form>
+                    <div id="manual-status" class="mt-2 text-center text-sm"></div>
+                </div>
+
+                <div id="step-2-account-setup" class="view hidden">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-6">Paso 2: Configurar Cuenta</h3>
+                    <div class="bg-blue-50 p-4 rounded-lg mb-4 text-left text-sm text-gray-700">
+                        <p class="font-semibold mb-2">Datos a Registrar:</p>
+                        <ul class="list-disc list-inside">
+                            <li><strong>Nombre:</strong> <span id="reg-nombres"></span> <span id="reg-apellidos"></span></li>
+                            <li><strong>Identidad:</strong> <span id="reg-identidad"></span></li>
+                        </ul>
+                    </div>
+                    <form id="account-setup-form" class="space-y-4">
+                        <input type="hidden" id="hidden-nombres" name="nombres">
+                        <input type="hidden" id="hidden-apellidos" name="apellidos">
+                        <input type="hidden" id="hidden-identidad" name="identidad">
+                        <input type="hidden" id="hidden-nacionalidad" name="nacionalidad">
+                        <input type="hidden" id="hidden-fecha-nacimiento" name="fecha_nacimiento">
+                        <input type="hidden" id="hidden-fecha-expiracion" name="fecha_expiracion">
+                        <input type="hidden" id="hidden-face-verified" name="face_verified">
+                        <input type="hidden" id="hidden-face-similarity" name="face_similarity">
+
+                        <div>
+                            <input type="email" id="register-email" name="email" placeholder="Correo Electrónico (Opcional)" class="input-field">
+                            <p class="text-xs text-gray-500 mt-1 text-left">Si no tienes correo, déjalo en blanco.</p>
+                        </div>
+                        
+                        <div class="relative">
+                            <input type="password" id="register-password" name="password" placeholder="Contraseña" class="input-field" required>
+                        </div>
+                        <div class="relative">
+                            <input type="password" id="confirm-password" name="confirm_password" placeholder="Confirmar Contraseña" class="input-field" required>
+                        </div>
+                        
+                        <button type="submit" class="button-primary w-full">Crear Cuenta</button>
+                    </form>
+                    <div id="account-setup-status" class="mt-4 text-center"></div>
+                </div>
+            </div>
+            
+            <button type="button" class="button-secondary w-full mt-4" onclick="window.location.href='login.html'">Volver al Login</button>
+        </div>
+    </div>
+
+    <div id="camera-overlay" class="hidden">
+        <video id="camera-feed" playsinline autoplay></video>
+        <div class="camera-guide-overlay">
+            <p id="camera-instructions" class="text-white text-lg font-semibold bg-black/50 px-4 py-2 rounded mb-4"></p>
+            <div id="camera-guide-box" class="hidden"></div>
+            <div id="selfie-guide-oval" class="hidden"></div>
+            <div id="barcode-line" class="hidden w-64 h-1 bg-red-500 shadow-[0_0_10px_red]"></div>
+        </div>
+        <div id="camera-controls">
+            <button id="capture-btn" class="camera-button hidden">📸</button> 
+            <button id="close-camera-btn" class="camera-button">❌</button>
+        </div>
+    </div>
+
+    <script>
+        let currentStream = null;
+        let currentTargetInputId = null;
+
+        function switchTab(tab) {
+            document.getElementById('step-2-account-setup').classList.add('hidden');
+            if (tab === 'auto') {
+                document.getElementById('step-1-identity-verification').classList.remove('hidden');
+                document.getElementById('step-1-manual-registration').classList.add('hidden');
+                document.getElementById('tab-auto').classList.add('tab-active');
+                document.getElementById('tab-auto').classList.remove('tab-inactive');
+                document.getElementById('tab-manual').classList.remove('tab-active');
+                document.getElementById('tab-manual').classList.add('tab-inactive');
+            } else {
+                document.getElementById('step-1-identity-verification').classList.add('hidden');
+                document.getElementById('step-1-manual-registration').classList.remove('hidden');
+                document.getElementById('tab-manual').classList.add('tab-active');
+                document.getElementById('tab-manual').classList.remove('tab-inactive');
+                document.getElementById('tab-auto').classList.remove('tab-active');
+                document.getElementById('tab-auto').classList.add('tab-inactive');
+            }
+        }
+
+        function openCamera(targetInputId) {
+            currentTargetInputId = targetInputId;
+            const instructions = document.getElementById('camera-instructions');
+            document.getElementById('capture-btn').classList.remove('hidden');
+            if (targetInputId === 'selfie') {
+                instructions.textContent = "Selfie: Rostro dentro del óvalo.";
+                document.getElementById('camera-guide-box').classList.add('hidden');
+                document.getElementById('selfie-guide-oval').classList.remove('hidden');
+            } else {
+                instructions.textContent = "ID: Alinee la tarjeta en el cuadro.";
+                document.getElementById('selfie-guide-oval').classList.add('hidden');
+                document.getElementById('camera-guide-box').classList.remove('hidden');
+            }
+            startCameraStream(targetInputId === 'selfie' ? 'user' : 'environment');
+        }
+
+        function scanBarcode() {
+            alert("Si tienes un carnet con código de barras, usa el escáner de tu celular o escribe el número manualmente.");
+            document.getElementById('manual-identidad').focus();
+        }
+
+        function startCameraStream(facingMode) {
+            navigator.mediaDevices.getUserMedia({
+                video: { facingMode: facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } }
+            }).then(stream => {
+                currentStream = stream;
+                document.getElementById('camera-feed').srcObject = stream;
+                document.getElementById('camera-overlay').classList.remove('hidden');
+            }).catch(err => alert("Error cámara: " + err));
+        }
+
+        function closeCamera() {
+            if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+            document.getElementById('camera-overlay').classList.add('hidden');
+        }
+
+        document.getElementById('capture-btn').addEventListener('click', () => {
+            const video = document.getElementById('camera-feed');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth; 
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            canvas.toBlob(blob => {
+                const file = new File([blob], "capture.jpg", { type: 'image/jpeg' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                const input = document.getElementById(currentTargetInputId);
+                input.files = dataTransfer.files;
+                if(currentTargetInputId === 'imagen_id') updateFileAndPreview('idFileName', 'idImagePreview', input);
+                if(currentTargetInputId === 'selfie') updateFileAndPreview('selfieFileName', 'selfieImagePreview', input);
+                closeCamera();
+            }, 'image/jpeg', 0.8);
+        });
+        
+        document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
+
+        function updateFileAndPreview(spanId, imgId, input) {
+            if (input.files && input.files[0]) {
+                document.getElementById(spanId).textContent = "Imagen cargada";
+                const img = document.getElementById(imgId);
+                img.src = URL.createObjectURL(input.files[0]);
+                img.classList.remove('hidden');
+            }
+        }
+
+        async function checkUserExists(field) {
+            const value = field.value.trim();
+            if (!value) return false;
+            if (field.name === 'email' && value === '') return false;
+
+            const payload = {};
+            if (field.name === 'email') payload.email = value;
+            if (field.id === 'manual-identidad') payload.identity_number = value;
+            
+            try {
+                const res = await fetch('api/check_user.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                
+                // Mostrar alerta si es manual
+                if (field.id === 'manual-identidad') {
+                     const statusDiv = document.getElementById('manual-status');
+                     if (result.exists) {
+                        statusDiv.innerHTML = `<p class="text-yellow-600 font-bold">⚠️ Este usuario ya está registrado.</p>`;
+                        return true;
+                     } else {
+                        statusDiv.innerHTML = '';
+                     }
+                }
+                
+                // Mostrar alerta si es email en paso 2
+                if (field.id === 'register-email') {
+                    const statusDiv = document.getElementById('account-setup-status');
+                    if (result.exists) {
+                        statusDiv.innerHTML = `<p class="text-yellow-600">Este email ya existe.</p>`;
+                        return true;
+                    }
+                }
+                
+                return false;
+            } catch (e) { console.error(e); return false; }
+        }
+
+        document.getElementById('register-email').addEventListener('blur', (e) => checkUserExists(e.target));
+        // Validar también identidad manual al salir del campo
+        const idManual = document.getElementById('manual-identidad');
+        idManual.addEventListener('blur', (e) => checkUserExists(e.target));
+        
+        // --- CORRECCIÓN BUG: Bloquear caracteres no numéricos al escribir ---
+        idManual.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        // -------------------------------------------------------------------
+
+        // 1. Envío Manual
+        document.getElementById('manual-registration-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const identidadField = document.getElementById('manual-identidad');
+            
+            // Verificar antes de avanzar
+            const exists = await checkUserExists(identidadField);
+            if (exists) {
+                alert("Este usuario ya está registrado. Inicia sesión.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const nombres = document.getElementById('manual-nombres').value;
+            const apellidos = document.getElementById('manual-apellidos').value;
+            const fechaNac = document.getElementById('manual-fecha-nacimiento').value;
+
+            fillStep2({
+                extracted_data: {
+                    nombres: nombres,
+                    apellidos: apellidos,
+                    identidad: identidadField.value,
+                    fecha_nacimiento: fechaNac || null,
+                    nacionalidad: 'Hondureña'
+                },
+                face_verification: { verified: false, similarity: 0 }
+            });
+        });
+
+        // 2. Envío Automático (API) CON VALIDACIÓN PREVIA
+        document.getElementById('identity-verification-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusDiv = document.getElementById('identity-verification-status');
+            statusDiv.innerHTML = '<p class="text-blue-500">Procesando... Espere.</p>';
+            
+            const formData = new FormData(e.target);
+            try {
+                // LLAMADA A API EXTERNA
+                const response = await fetch('https://api.adiggm.hn/verificar', { method: 'POST', body: formData });
+                const result = await response.json();
+
+                if (result.status === 'success' || result.status.includes('partial')) {
+                     // --- CORRECCIÓN BUG: Limpiar ID del escáner también ---
+                     let idNumber = result.extracted_data.identidad;
+                     // Quitar basura si viene del OCR (espacios, guiones, letras)
+                     idNumber = idNumber.replace(/[^0-9]/g, '');
+                     result.extracted_data.identidad = idNumber;
+                     // ------------------------------------------------------
+
+                     // Consultamos check_user.php
+                     const checkRes = await fetch('api/check_user.php', {
+                         method: 'POST',
+                         headers: { 'Content-Type': 'application/json' },
+                         body: JSON.stringify({ identity_number: idNumber })
+                     });
+                     const checkData = await checkRes.json();
+
+                     if (checkData.exists) {
+                         // YA EXISTE: MOSTRAR MENSAJE Y BOTÓN LOGIN
+                         statusDiv.innerHTML = `
+                            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mt-2" role="alert">
+                                <p class="font-bold">⚠️ Usuario Registrado</p>
+                                <p>La identidad ${idNumber} ya tiene cuenta.</p>
+                                <button onclick="window.location.href='login.html'" class="mt-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">
+                                    Iniciar Sesión
+                                </button>
+                            </div>`;
+                         return; // IMPORTANTE: Detenemos aquí
+                     }
+
+                     // SI NO EXISTE, CONTINUAMOS
+                     fillStep2(result);
+                     statusDiv.innerHTML = '';
+                } else {
+                    statusDiv.innerHTML = `<p class="text-red-500">Error: ${result.error || 'No se pudo leer el ID'}. Intente el modo Manual.</p>`;
+                }
+            } catch (err) {
+                statusDiv.innerHTML = '<p class="text-red-500">Error de conexión con API. Usa el Registro Manual.</p>';
+            }
+        });
+
+        function fillStep2(data) {
+            document.getElementById('reg-nombres').textContent = data.extracted_data.nombres;
+            document.getElementById('reg-apellidos').textContent = data.extracted_data.apellidos;
+            document.getElementById('reg-identidad').textContent = data.extracted_data.identidad;
+
+            document.getElementById('hidden-nombres').value = data.extracted_data.nombres;
+            document.getElementById('hidden-apellidos').value = data.extracted_data.apellidos;
+            document.getElementById('hidden-identidad').value = data.extracted_data.identidad;
+            document.getElementById('hidden-nacionalidad').value = data.extracted_data.nacionalidad || '';
+            document.getElementById('hidden-fecha-nacimiento').value = data.extracted_data.fecha_nacimiento || '';
+            document.getElementById('hidden-face-verified').value = data.face_verification.verified ? 1 : 0;
+            
+            document.getElementById('auth-tabs').classList.add('hidden');
+            document.getElementById('step-1-identity-verification').classList.add('hidden');
+            document.getElementById('step-1-manual-registration').classList.add('hidden');
+            document.getElementById('step-2-account-setup').classList.remove('hidden');
+        }
+
+        // 3. SUBMIT FINAL
+        document.getElementById('account-setup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const statusDiv = document.getElementById('account-setup-status');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            statusDiv.innerHTML = '<p class="text-blue-500 font-medium">Creando cuenta...</p>';
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            const formData = new FormData(e.target);
+
+            try {
+                const response = await fetch('api/process_register.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+
+                if (result.success) {
+                    statusDiv.innerHTML = `<p class="text-green-600 font-bold text-lg">✅ ${result.message}</p>
+                                           <p class="text-gray-600 text-sm mt-2">Redirigiendo al login...</p>`;
+                    setTimeout(() => {
+                        window.location.href = 'login.html?success=' + encodeURIComponent(result.message);
+                    }, 2000);
+                } else {
+                    statusDiv.innerHTML = `<p class="text-red-500 font-bold">⚠️ ${result.message}</p>`;
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            } catch (error) {
+                console.error(error);
+                statusDiv.innerHTML = '<p class="text-red-500 font-bold">Error de conexión con el servidor.</p>';
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        });
+    </script>
+</body>
+</html>

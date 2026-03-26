@@ -1,0 +1,71 @@
+[29-Jan-2026 16:42:27 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'adiggmhn_EstadoCuenta.solicitudes_prestamo' doesn't exist in /home1/adiggmhn/public_html/sac/api/request_loan.php:50
+Stack trace:
+#0 /home1/adiggmhn/public_html/sac/api/request_loan.php(50): mysqli->prepare('INSERT INTO sol...')
+#1 {main}
+  thrown in /home1/adiggmhn/public_html/sac/api/request_loan.php on line 50
+[29-Jan-2026 16:45:16 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'adiggmhn_EstadoCuenta.solicitudes_prestamo' doesn't exist in /home1/adiggmhn/public_html/sac/api/request_loan.php:50
+Stack trace:
+#0 /home1/adiggmhn/public_html/sac/api/request_loan.php(50): mysqli->prepare('INSERT INTO sol...')
+#1 {main}
+  thrown in /home1/adiggmhn/public_html/sac/api/request_loan.php on line 50
+[29-Jan-2026 16:47:15 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'adiggmhn_EstadoCuenta.solicitudes_prestamo' doesn't exist in /home1/adiggmhn/public_html/sac/api/request_loan.php:50
+Stack trace:
+#0 /home1/adiggmhn/public_html/sac/api/request_loan.php(50): mysqli->prepare('INSERT INTO sol...')
+#1 {main}
+  thrown in /home1/adiggmhn/public_html/sac/api/request_loan.php on line 50
+[29-Jan-2026 17:00:05 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'adiggmhn_EstadoCuenta.solicitudes_prestamo' doesn't exist in /home1/adiggmhn/public_html/sac/api/request_loan.php:50
+Stack trace:
+#0 /home1/adiggmhn/public_html/sac/api/request_loan.php(50): mysqli->prepare('INSERT INTO sol...')
+#1 {main}
+  thrown in /home1/adiggmhn/public_html/sac/api/request_loan.php on line 50
+[29-Jan-2026 17:01:29 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'adiggmhn_EstadoCuenta.solicitudes_prestamo' doesn't exist in /home1/adiggmhn/public_html/sac/api/request_loan.php:50
+Stack trace:
+#0 /home1/adiggmhn/public_html/sac/api/request_loan.php(50): mysqli->prepare('INSERT INTO sol...')
+#1 {main}
+  thrown in /home1/adiggmhn/public_html/sac/api/request_loan.php on line 50
+[29-Jan-2026 17:03:32 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'adiggmhn_EstadoCuenta.solicitudes_prestamo' doesn't exist in /home1/adiggmhn/public_html/sac/api/request_loan.php:50
+Stack trace:
+#0 /home1/adiggmhn/public_html/sac/api/request_loan.php(50): mysqli->prepare('INSERT INTO sol...')
+#1 {main}
+  thrown in /home1/adiggmhn/public_html/sac/api/request_loan.php on line 50
+[29-Jan-2026 17:05:14 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'adiggmhn_EstadoCuenta.solicitudes_prestamo' doesn't exist in /home1/adiggmhn/public_html/sac/api/request_loan.php:50
+Stack trace:
+#0 /home1/adiggmhn/public_html/sac/api/request_loan.php(50): mysqli->prepare('INSERT INTO sol...')
+#1 {main}
+  thrown in /home1/adiggmhn/public_html/sac/api/request_loan.php on line 50
+[29-Jan-2026 19:48:29 UTC] PHP Warning:  require_once(/home1/adiggmhn/public_html/sac/api/env_loader.php): Failed to open stream: No such file or directory in /home1/adiggmhn/public_html/sac/api/get_rifa.php on line 4
+[29-Jan-2026 19:48:29 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home1/adiggmhn/public_html/sac/api/env_loader.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home1/adiggmhn/public_html/sac/api/get_rifa.php:4
+Stack trace:
+#0 {main}
+  thrown in /home1/adiggmhn/public_html/sac/api/get_rifa.php on line 4
+[29-Jan-2026 19:48:35 UTC] PHP Warning:  require_once(/home1/adiggmhn/public_html/sac/api/env_loader.php): Failed to open stream: No such file or directory in /home1/adiggmhn/public_html/sac/api/get_rifa.php on line 4
+[29-Jan-2026 19:48:35 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home1/adiggmhn/public_html/sac/api/env_loader.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home1/adiggmhn/public_html/sac/api/get_rifa.php:4
+Stack trace:
+#0 {main}
+  thrown in /home1/adiggmhn/public_html/sac/api/get_rifa.php on line 4
+[29-Jan-2026 19:48:41 UTC] PHP Warning:  require_once(/home1/adiggmhn/public_html/sac/api/env_loader.php): Failed to open stream: No such file or directory in /home1/adiggmhn/public_html/sac/api/get_rifa.php on line 4
+[29-Jan-2026 19:48:41 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home1/adiggmhn/public_html/sac/api/env_loader.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home1/adiggmhn/public_html/sac/api/get_rifa.php:4
+Stack trace:
+#0 {main}
+  thrown in /home1/adiggmhn/public_html/sac/api/get_rifa.php on line 4
+[29-Jan-2026 19:51:54 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'adiggmhn_EstadoCuenta.SAC_Rifa' doesn't exist in /home1/adiggmhn/public_html/sac/api/get_rifa.php:29
+Stack trace:
+#0 /home1/adiggmhn/public_html/sac/api/get_rifa.php(29): mysqli->prepare('SELECT `Nombre`...')
+#1 {main}
+  thrown in /home1/adiggmhn/public_html/sac/api/get_rifa.php on line 29
+[29-Jan-2026 19:51:56 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'adiggmhn_EstadoCuenta.SAC_Rifa' doesn't exist in /home1/adiggmhn/public_html/sac/api/get_rifa.php:29
+Stack trace:
+#0 /home1/adiggmhn/public_html/sac/api/get_rifa.php(29): mysqli->prepare('SELECT `Nombre`...')
+#1 {main}
+  thrown in /home1/adiggmhn/public_html/sac/api/get_rifa.php on line 29
+[29-Jan-2026 19:55:26 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'adiggmhn_EstadoCuenta.SAC_Rifa' doesn't exist in /home1/adiggmhn/public_html/sac/api/get_rifa.php:29
+Stack trace:
+#0 /home1/adiggmhn/public_html/sac/api/get_rifa.php(29): mysqli->prepare('SELECT `Nombre`...')
+#1 {main}
+  thrown in /home1/adiggmhn/public_html/sac/api/get_rifa.php on line 29
+[20-Feb-2026 20:53:51 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Connection refused in /home1/adiggmhn/public_html/sac/config/db.php:25
+Stack trace:
+#0 /home1/adiggmhn/public_html/sac/config/db.php(25): mysqli->__construct('adiggm.hn', 'adiggmhn_sa', Object(SensitiveParameterValue), 'adiggmhn_Portal')
+#1 /home1/adiggmhn/public_html/sac/api/check_user.php(7): Database->getPortalConnection()
+#2 {main}
+  thrown in /home1/adiggmhn/public_html/sac/config/db.php on line 25
