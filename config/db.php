@@ -10,23 +10,31 @@ loadEnv(__DIR__ . '/../.env');
 date_default_timezone_set('America/Tegucigalpa');
 
 class Database {
-    private $host;
-    private $user;
-    private $pass;
-    private $namePortal;
-    private $nameEstado;
+    // Implementación de tipado estricto (PHP 7.4+)
+    private string $host;
+    private string $user;
+    private string $pass;
+    private string $namePortal;
+    private string $nameEstado;
 
     public function __construct() {
-        $this->host = getenv('DB_HOST');
-        $this->user = getenv('DB_USER');
-        $this->pass = getenv('DB_PASS');
-        $this->namePortal = getenv('DB_NAME_PORTAL');
-        $this->nameEstado = getenv('DB_NAME_ESTADO');
+        // Uso de coalescencia nula para evitar warnings si la variable no está definida
+        $this->host = getenv('DB_HOST') ?: '';
+        $this->user = getenv('DB_USER') ?: '';
+        $this->pass = getenv('DB_PASS') ?: '';
+        $this->namePortal = getenv('DB_NAME_PORTAL') ?: '';
+        $this->nameEstado = getenv('DB_NAME_ESTADO') ?: '';
     }
 
     // Conexión a la BD de Usuarios (Portal)
-    public function getPortalConnection() {
+    // El tipo de retorno ?mysqli indica que devuelve un objeto mysqli o null
+    public function getPortalConnection(): ?mysqli {
+        // Suprimimos el warning de mysqli con @ o manejamos la excepción silenciosamente
+        // para mantener tu lógica de error_log intacta.
+        mysqli_report(MYSQLI_REPORT_OFF); 
+        
         $conn = new mysqli($this->host, $this->user, $this->pass, $this->namePortal);
+        
         if ($conn->connect_error) {
             error_log("Error conexión Portal: " . $conn->connect_error);
             return null;
@@ -41,8 +49,11 @@ class Database {
     }
 
     // Conexión a la BD Financiera (Estado de Cuenta)
-    public function getFinancialConnection() {
+    public function getFinancialConnection(): ?mysqli {
+        mysqli_report(MYSQLI_REPORT_OFF);
+        
         $conn = new mysqli($this->host, $this->user, $this->pass, $this->nameEstado);
+        
         if ($conn->connect_error) {
             error_log("Error conexión Financiera: " . $conn->connect_error);
             return null;
