@@ -31,7 +31,7 @@ try {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Solución a las advertencias: Uso de coalescencia nula y forzado de tipo string
     $email = trim((string)($_POST['email'] ?? ''));
-    $identity = trim((string)($_POST['identity'] ?? ''));
+    $identity = trim((string)($_POST['identity_number'] ?? ''));
 
     // Validación para evitar procesar consultas si faltan datos
     if (empty($email) || empty($identity)) {
