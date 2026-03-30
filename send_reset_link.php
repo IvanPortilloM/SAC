@@ -29,8 +29,15 @@ try {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = trim($_POST['email']);
-    $identity = trim($_POST['identity']);
+    // Solución a las advertencias: Uso de coalescencia nula y forzado de tipo string
+    $email = trim((string)($_POST['email'] ?? ''));
+    $identity = trim((string)($_POST['identity'] ?? ''));
+
+    // Validación para evitar procesar consultas si faltan datos
+    if (empty($email) || empty($identity)) {
+        header("Location: forgot_password.html?status=error&message=" . urlencode("Por favor, complete todos los campos obligatorios."));
+        exit();
+    }
 
     $stmt = $pdo->prepare("SELECT id, nombres FROM users WHERE email = ? AND identity_number = ?");
     $stmt->execute([$email, $identity]);
@@ -84,18 +91,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             ";
 
             $mail->send();
-            // Mensaje de éxito genérico
             header("Location: forgot_password.html?status=success&message=" . urlencode("Si los datos coinciden, recibirás un correo con las instrucciones."));
             exit();
 
         } catch (Exception $e) {
-            // Ocultamos el error técnico al usuario y lo mandamos al log del servidor
             error_log("Mailer Error: " . $mail->ErrorInfo);
             header("Location: forgot_password.html?status=error&message=" . urlencode("Error al enviar el correo. Por favor, intenta de nuevo más tarde."));
             exit();
         }
     } else {
-        // Mensaje genérico por seguridad (Mismo que en éxito)
         header("Location: forgot_password.html?status=success&message=" . urlencode("Si los datos coinciden, recibirás un correo con las instrucciones."));
         exit();
     }
