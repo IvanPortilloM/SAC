@@ -74,3 +74,6 @@ Stack trace:
 #0 /home1/adiggmhn/public_html/sac/api/update_profile.php(63): mysqli_stmt->execute()
 #1 {main}
   thrown in /home1/adiggmhn/public_html/sac/api/update_profile.php on line 63
+[28-Mar-2026 00:47:28 America/Tegucigalpa] Error actualizando perfil: Duplicate entry '' for key 'email'
+[29-Mar-2026 19:10:56 America/Tegucigalpa] Error actualizando perfil: Duplicate entry '' for key 'email'
+[29-Mar-2026 19:11:02 America/Tegucigalpa] Error actualizando perfil: Duplicate entry '' for key 'email'
