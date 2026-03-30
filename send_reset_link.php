@@ -66,8 +66,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->SMTPAuth   = true;
             $mail->Username   = getenv('SMTP_USER');
             $mail->Password   = getenv('SMTP_PASS');
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-            $mail->Port       = getenv('SMTP_PORT') ?: 465;
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+$mail->Port       = getenv('SMTP_PORT') ?: 587;
             $mail->CharSet    = 'UTF-8';
 
             $mail->setFrom(getenv('SMTP_USER'), 'ADI - Grupo Granjas Marinas');
