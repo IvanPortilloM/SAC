@@ -77,3 +77,4 @@ Stack trace:
 [28-Mar-2026 00:47:28 America/Tegucigalpa] Error actualizando perfil: Duplicate entry '' for key 'email'
 [29-Mar-2026 19:10:56 America/Tegucigalpa] Error actualizando perfil: Duplicate entry '' for key 'email'
 [29-Mar-2026 19:11:02 America/Tegucigalpa] Error actualizando perfil: Duplicate entry '' for key 'email'
+[30-Mar-2026 16:34:21 America/Tegucigalpa] Error registrando usuario: Duplicate entry '' for key 'email'
