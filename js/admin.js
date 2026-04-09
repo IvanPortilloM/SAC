@@ -12,7 +12,8 @@
         } else {
             document.body.style.display = 'block'; 
             loadUsers();
-            loadAdminNews(); // Cargamos la lista de noticias al iniciar
+            loadAdminNews(); 
+            loadAdminFaqs(); // Añadido: Carga de FAQs al inicio
         }
     } catch (e) {
         console.error(e);
@@ -22,14 +23,13 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 2. GESTIÓN DE NOTICIAS (CREAR / EDITAR)
+    // -- GESTIÓN DE NOTICIAS --
     const formNews = document.getElementById('form-news');
     const btnCancelEdit = document.getElementById('btn-cancel-edit');
     
     if(formNews) {
         formNews.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const id = document.getElementById('news-id').value;
             const isEditing = id !== "";
             const actionText = isEditing ? "actualizar" : "publicar";
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(!confirm(`¿Seguro que deseas ${actionText} esta noticia?`)) return;
 
             const payload = {
-                id: id, // Solo será tomado en cuenta en el update
+                id: id,
                 titulo: document.getElementById('news-title').value,
                 contenido: document.getElementById('news-content').value,
                 imagen_url: document.getElementById('news-img').value,
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(data.success) {
                     alert(`✅ Noticia ${isEditing ? 'actualizada' : 'publicada'} exitosamente.`);
                     resetNewsForm();
-                    loadAdminNews(); // Recargar tabla
+                    loadAdminNews(); 
                 } else {
                     alert("❌ Error: " + data.error);
                 }
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnCancelEdit.addEventListener('click', resetNewsForm);
     }
 
-    // 3. NOTIFICACIONES
+    // -- GESTIÓN DE NOTIFICACIONES --
     const formNotif = document.getElementById('form-notif');
     if(formNotif) {
         formNotif.addEventListener('submit', async (e) => {
@@ -97,36 +97,54 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 4. FAQS
+    // -- GESTIÓN DE FAQS --
     const formFaq = document.getElementById('form-faq');
+    const btnCancelFaqEdit = document.getElementById('btn-cancel-faq-edit');
+
     if(formFaq) {
         formFaq.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const id = document.getElementById('faq-id').value;
+            const isEditing = id !== "";
+            const actionText = isEditing ? "actualizar" : "guardar";
+
+            if(!confirm(`¿Seguro que deseas ${actionText} esta pregunta frecuente?`)) return;
+
             const payload = {
-                categoria_id: parseInt(document.getElementById('faq-category')?.value) || 0,
+                id: id,
+                categoria_id: 0, // Según el código anterior, puede venir de un select si se implementan categorías luego
                 pregunta: document.getElementById('faq-question').value,
                 respuesta: document.getElementById('faq-answer').value
             };
 
+            const endpoint = isEditing ? 'api/admin_update_faq.php' : 'api/admin_create_faq.php';
+
             try {
-                const res = await fetch('api/admin_create_faq.php', {
+                const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
+                
                 if(data.success) {
-                    alert("✅ Pregunta guardada exitosamente.");
-                    formFaq.reset();
+                    alert(`✅ Pregunta ${isEditing ? 'actualizada' : 'guardada'} exitosamente.`);
+                    resetFaqForm();
+                    loadAdminFaqs(); // Recargar tabla
                 } else {
                     alert("❌ Error: " + data.error);
                 }
             } catch(err) { console.error(err); alert("Error de conexión"); }
         });
+
+        btnCancelFaqEdit.addEventListener('click', resetFaqForm);
     }
 });
 
-// -- FUNCIONES AUXILIARES --
+
+// ==========================================
+// FUNCIONES AUXILIARES (CARGA Y LISTADOS)
+// ==========================================
 
 async function loadUsers() {
     try {
@@ -145,6 +163,7 @@ async function loadUsers() {
     } catch(err) { console.error("Error cargando usuarios", err); }
 }
 
+// -- LÓGICA DE NOTICIAS --
 async function loadAdminNews() {
     const listContainer = document.getElementById('admin-news-list');
     try {
@@ -159,7 +178,6 @@ async function loadAdminNews() {
             }
 
             data.data.forEach(news => {
-                // Almacenamos el objeto crudo en un atributo de datos para usarlo en la edición
                 const item = document.createElement('div');
                 item.className = "flex justify-between items-center p-3 bg-gray-50 border rounded-lg";
                 item.innerHTML = `
@@ -193,14 +211,11 @@ window.editNews = function(news) {
     document.getElementById('news-form-title').innerText = "✏️ Editar Noticia";
     document.getElementById('btn-save-news').innerText = "Actualizar Noticia";
     document.getElementById('btn-cancel-edit').classList.remove('hidden');
-    
-    // Scroll al formulario
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 window.deleteNews = async function(id) {
-    if(!confirm("⚠️ ¿Estás seguro de que deseas eliminar esta noticia? Esta acción no se puede deshacer.")) return;
-    
+    if(!confirm("⚠️ ¿Estás seguro de que deseas eliminar esta noticia?")) return;
     try {
         const res = await fetch('api/admin_delete_news.php', {
             method: 'POST',
@@ -208,13 +223,10 @@ window.deleteNews = async function(id) {
             body: JSON.stringify({ id: id })
         });
         const data = await res.json();
-        
         if(data.success) {
             alert("🗑️ Noticia eliminada.");
-            loadAdminNews(); // Recargar lista
-        } else {
-            alert("❌ Error: " + data.error);
-        }
+            loadAdminNews();
+        } else alert("❌ Error: " + data.error);
     } catch(err) { console.error(err); alert("Error de conexión"); }
 };
 
@@ -224,4 +236,75 @@ function resetNewsForm() {
     document.getElementById('news-form-title').innerText = "Crear Noticia";
     document.getElementById('btn-save-news').innerText = "Publicar Noticia";
     document.getElementById('btn-cancel-edit').classList.add('hidden');
+}
+
+// -- LÓGICA DE FAQS --
+async function loadAdminFaqs() {
+    const listContainer = document.getElementById('admin-faq-list');
+    try {
+        const res = await fetch('api/get_faqs.php');
+        const data = await res.json();
+        
+        if(data.success) {
+            listContainer.innerHTML = '';
+            if(data.data.length === 0) {
+                listContainer.innerHTML = '<p class="text-gray-500 text-sm">No hay FAQs registradas.</p>';
+                return;
+            }
+
+            data.data.forEach(faq => {
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center p-3 bg-gray-50 border rounded-lg";
+                item.innerHTML = `
+                    <div class="flex-1 pr-4">
+                        <h3 class="font-bold text-gray-800 text-sm">${faq.pregunta}</h3>
+                        <p class="text-xs text-gray-500 truncate mt-1">${faq.respuesta}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick='editFaq(${JSON.stringify(faq).replace(/'/g, "&#39;")})' class="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded hover:bg-yellow-200">Editar</button>
+                        <button onclick="deleteFaq(${faq.id})" class="px-3 py-1 bg-red-100 text-red-700 text-sm rounded hover:bg-red-200">Borrar</button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+    } catch(err) {
+        console.error("Error cargando FAQs", err);
+        listContainer.innerHTML = '<p class="text-red-500 text-sm">Error cargando lista de FAQs.</p>';
+    }
+}
+
+window.editFaq = function(faq) {
+    document.getElementById('faq-id').value = faq.id;
+    document.getElementById('faq-question').value = faq.pregunta;
+    document.getElementById('faq-answer').value = faq.respuesta;
+
+    document.getElementById('faq-form-title').innerText = "✏️ Editar Pregunta Frecuente";
+    document.getElementById('btn-save-faq').innerText = "Actualizar Pregunta";
+    document.getElementById('btn-cancel-faq-edit').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.deleteFaq = async function(id) {
+    if(!confirm("⚠️ ¿Estás seguro de que deseas eliminar esta pregunta frecuente?")) return;
+    try {
+        const res = await fetch('api/admin_delete_faq.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        });
+        const data = await res.json();
+        if(data.success) {
+            alert("🗑️ FAQ eliminada.");
+            loadAdminFaqs();
+        } else alert("❌ Error: " + data.error);
+    } catch(err) { console.error(err); alert("Error de conexión"); }
+};
+
+function resetFaqForm() {
+    document.getElementById('form-faq').reset();
+    document.getElementById('faq-id').value = "";
+    document.getElementById('faq-form-title').innerText = "Añadir Pregunta Frecuente";
+    document.getElementById('btn-save-faq').innerText = "Guardar Pregunta";
+    document.getElementById('btn-cancel-faq-edit').classList.add('hidden');
 }
