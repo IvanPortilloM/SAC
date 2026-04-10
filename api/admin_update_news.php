@@ -12,9 +12,11 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['rol']) || $_SESSION['rol']
 
 $input = json_decode(file_get_contents('php://input'), true);
 
+$etiquetas_permitidas = '<p><br><b><strong><i><em><u><a><ul><ol><li><h1><h2><h3><h4><h5><h6><blockquote><img><div><span>';
+
 $id = isset($input['id']) ? intval($input['id']) : 0;
 $titulo = isset($input['titulo']) ? trim(strip_tags($input['titulo'])) : '';
-$contenido = isset($input['contenido']) ? trim(strip_tags($input['contenido'])) : '';
+$contenido = isset($input['contenido']) ? trim(strip_tags($input['contenido'], $etiquetas_permitidas)) : '';
 $imagen_url = isset($input['imagen_url']) ? trim(strip_tags($input['imagen_url'])) : '';
 $es_importante = !empty($input['es_importante']) ? 1 : 0;
 

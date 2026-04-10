@@ -12,9 +12,11 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['rol']) || $_SESSION['rol']
 
 $input = json_decode(file_get_contents('php://input'), true);
 
+$etiquetas_permitidas = '<p><br><b><strong><i><em><u><a><ul><ol><li><h1><h2><h3><h4><h5><h6><blockquote><img><div><span>';
+
 $id = isset($input['id']) ? intval($input['id']) : 0;
 $pregunta = isset($input['pregunta']) ? trim(strip_tags($input['pregunta'])) : '';
-$respuesta = isset($input['respuesta']) ? trim(strip_tags($input['respuesta'])) : '';
+$respuesta = isset($input['respuesta']) ? trim(strip_tags($input['respuesta'], $etiquetas_permitidas)) : '';
 
 if ($id <= 0 || empty($pregunta) || empty($respuesta)) {
     echo json_encode(['success' => false, 'error' => 'ID, pregunta y respuesta son obligatorios.']);
