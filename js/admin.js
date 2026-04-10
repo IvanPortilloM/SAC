@@ -13,7 +13,7 @@
             document.body.style.display = 'block'; 
             loadUsers();
             loadAdminNews(); 
-            loadAdminFaqs(); // Añadido: Carga de FAQs al inicio
+            loadAdminFaqs(); 
         }
     } catch (e) {
         console.error(e);
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const payload = {
                 id: id,
-                categoria_id: 0, // Según el código anterior, puede venir de un select si se implementan categorías luego
+                categoria_id: 0, 
                 pregunta: document.getElementById('faq-question').value,
                 respuesta: document.getElementById('faq-answer').value
             };
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(data.success) {
                     alert(`✅ Pregunta ${isEditing ? 'actualizada' : 'guardada'} exitosamente.`);
                     resetFaqForm();
-                    loadAdminFaqs(); // Recargar tabla
+                    loadAdminFaqs(); 
                 } else {
                     alert("❌ Error: " + data.error);
                 }
@@ -179,15 +179,17 @@ async function loadAdminNews() {
 
             data.data.forEach(news => {
                 const item = document.createElement('div');
-                item.className = "flex justify-between items-center p-3 bg-gray-50 border rounded-lg";
+                // CAMBIO VISUAL: gap-4, items-start
+                item.className = "flex justify-between items-start p-3 bg-gray-50 border rounded-lg gap-4";
+                // CAMBIO VISUAL: flex-1 min-w-0 para el texto, flex-shrink-0 para los botones
                 item.innerHTML = `
-                    <div>
-                        <h3 class="font-bold text-gray-800 ${news.es_importante == 1 ? 'text-blue-600' : ''}">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-bold text-gray-800 truncate ${news.es_importante == 1 ? 'text-blue-600' : ''}">
                             ${news.es_importante == 1 ? '⭐ ' : ''}${news.titulo}
                         </h3>
-                        <p class="text-xs text-gray-500">${news.fecha_publicacion.split(' ')[0]}</p>
+                        <p class="text-xs text-gray-500 mt-1">${news.fecha_publicacion.split(' ')[0]}</p>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex-shrink-0 flex gap-2">
                         <button onclick='editNews(${JSON.stringify(news).replace(/'/g, "&#39;")})' class="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded hover:bg-yellow-200">Editar</button>
                         <button onclick="deleteNews(${news.id})" class="px-3 py-1 bg-red-100 text-red-700 text-sm rounded hover:bg-red-200">Borrar</button>
                     </div>
@@ -254,13 +256,15 @@ async function loadAdminFaqs() {
 
             data.data.forEach(faq => {
                 const item = document.createElement('div');
-                item.className = "flex justify-between items-center p-3 bg-gray-50 border rounded-lg";
+                // CAMBIO VISUAL: gap-4, items-start
+                item.className = "flex justify-between items-start p-3 bg-gray-50 border rounded-lg gap-4";
+                // CAMBIO VISUAL: flex-1 min-w-0 para el texto, line-clamp-3 para limitar la altura visual, flex-shrink-0 para botones
                 item.innerHTML = `
-                    <div class="flex-1 pr-4">
-                        <h3 class="font-bold text-gray-800 text-sm">${faq.pregunta}</h3>
-                        <p class="text-xs text-gray-500 truncate mt-1">${faq.respuesta}</p>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-bold text-gray-800 text-sm truncate">${faq.pregunta}</h3>
+                        <div class="text-xs text-gray-500 mt-1 line-clamp-3 overflow-hidden break-words">${faq.respuesta}</div>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex-shrink-0 flex gap-2">
                         <button onclick='editFaq(${JSON.stringify(faq).replace(/'/g, "&#39;")})' class="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded hover:bg-yellow-200">Editar</button>
                         <button onclick="deleteFaq(${faq.id})" class="px-3 py-1 bg-red-100 text-red-700 text-sm rounded hover:bg-red-200">Borrar</button>
                     </div>
