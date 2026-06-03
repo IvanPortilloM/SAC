@@ -1,5 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // Hace que las utilidades de Tailwind (.hidden, .flex, etc.) tengan prioridad
+  // sobre el CSS personalizado en línea (.modal-overlay, #camera-overlay...).
+  // Replica el comportamiento del CDN (que inyectaba sus estilos al final) y
+  // evita que los modales aparezcan abiertos o no se puedan cerrar.
+  important: true,
   // Archivos donde Tailwind busca las clases que usas (para incluir solo esas).
   content: [
     './*.html',
