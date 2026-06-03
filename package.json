@@ -1,0 +1,13 @@
+{
+  "name": "portal-sac-adiggm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portal SAC ADIGGM — compilación de estilos Tailwind",
+  "scripts": {
+    "build": "tailwindcss -i ./src/input.css -o ./css/styles.css --minify",
+    "watch": "tailwindcss -i ./src/input.css -o ./css/styles.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

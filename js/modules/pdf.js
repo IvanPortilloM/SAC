@@ -1,9 +1,33 @@
 // js/modules/pdf.js
 import { formatNumber } from './utils.js';
 
-export function generateStatementPDF(user, financialData) {
-    if (!window.jspdf) {
-        alert("Error: Librería PDF no cargada. Recarga la página.");
+// Cargamos jsPDF + autotable SOLO cuando el usuario pide el PDF.
+// Así el dashboard arranca más rápido (no descarga ~300 KB en cada visita).
+const JSPDF_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+const AUTOTABLE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js';
+
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) return resolve();
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = () => reject(new Error('No se pudo cargar ' + src));
+        document.head.appendChild(s);
+    });
+}
+
+async function ensurePdfLibs() {
+    if (!window.jspdf) await loadScript(JSPDF_URL);   // primero la base
+    await loadScript(AUTOTABLE_URL);                  // luego el plugin de tablas
+}
+
+export async function generateStatementPDF(user, financialData) {
+    try {
+        await ensurePdfLibs();
+    } catch (e) {
+        console.error(e);
+        alert("No se pudo cargar la librería de PDF. Revisa tu conexión a internet.");
         return;
     }
 

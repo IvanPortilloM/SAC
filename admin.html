@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - SAC</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }</style>
 </head>
@@ -120,17 +122,22 @@
     <script src="js/admin.js"></script>
     <script>
         function switchTab(tab) {
+            // Clases completas (literales) para que Tailwind las detecte al compilar.
+            const activeClasses = {
+                news:  "flex-1 py-4 text-center font-bold text-blue-600 border-b-2 border-blue-600 bg-blue-50 focus:outline-none transition",
+                notif: "flex-1 py-4 text-center font-bold text-green-600 border-b-2 border-green-600 bg-green-50 focus:outline-none transition",
+                faq:   "flex-1 py-4 text-center font-bold text-purple-600 border-b-2 border-purple-600 bg-purple-50 focus:outline-none transition"
+            };
+            const inactiveClass = "flex-1 py-4 text-center font-bold text-gray-500 hover:bg-gray-50 focus:outline-none transition";
+
             ['news', 'notif', 'faq'].forEach(t => {
                 document.getElementById('view-' + t).classList.add('hidden');
-                document.getElementById('tab-' + t).className = "flex-1 py-4 text-center font-bold text-gray-500 hover:bg-gray-50 focus:outline-none transition";
+                document.getElementById('tab-' + t).className = inactiveClass;
             });
             document.getElementById('view-' + tab).classList.remove('hidden');
-            
-            const colors = { 'news': 'blue', 'notif': 'green', 'faq': 'purple' };
-            const color = colors[tab];
-            
-            document.getElementById('tab-' + tab).className = `flex-1 py-4 text-center font-bold text-${color}-600 border-b-2 border-${color}-600 bg-${color}-50 focus:outline-none transition`;
+            document.getElementById('tab-' + tab).className = activeClasses[tab];
         }
     </script>
+    <script src="js/sw-register.js" defer></script>
 </body>
 </html>
