@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADI - Grupo Granjas Marinas - Dashboard</title>
+    <script src="js/csrf.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/styles.css">
@@ -56,9 +57,17 @@
         #news-section::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         #news-section::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
         #news-section::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        /* Skeleton screens: shimmer en los saldos mientras cargan los datos */
+        @keyframes skeleton-loading { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+        body.loading .saldo-privado {
+            display: inline-block; min-width: 5rem; color: transparent !important;
+            border-radius: 0.375rem; vertical-align: middle; user-select: none;
+            background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%);
+            background-size: 400% 100%; animation: skeleton-loading 1.4s ease infinite;
+        }
     </style>
 </head>
-<body>
+<body class="loading">
 
     <header class="mobile-header bg-white shadow-sm flex justify-between items-center px-4 py-3 md:hidden">
         <div class="flex items-center">
@@ -198,15 +207,15 @@
             <div class="w-full bg-transparent rounded-2xl overflow-hidden shadow-sm mb-8 relative group h-48 md:h-64">
                 <div id="ads-track" class="flex transition-transform duration-700 ease-in-out h-full">
                     <div class="min-w-full h-full relative">
-                        <img src="assets/img/slides/dashboard-feria.jpg" class="w-full h-full object-cover" alt="Utiles">
+                        <picture class="block w-full h-full"><source type="image/webp" srcset="assets/img/slides/dashboard-feria.webp"><img src="assets/img/slides/dashboard-feria.jpg" class="w-full h-full object-cover" alt="Utiles" decoding="async"></picture>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6"><h2 class="text-white text-2xl font-bold">¡Prepara el regreso a clases con nosotros!</h2></div>
                     </div>
                     <div class="min-w-full h-full relative">
-                        <img src="assets/img/slides/dashboard-temporada.jpg" class="w-full h-full object-cover" alt="Temporada">
+                        <picture class="block w-full h-full"><source type="image/webp" srcset="assets/img/slides/dashboard-temporada.webp"><img src="assets/img/slides/dashboard-temporada.jpg" class="w-full h-full object-cover" alt="Temporada" decoding="async"></picture>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6"><h2 class="text-white text-2xl font-bold">Aprovecha nuestros precios de temporada.</h2></div>
                     </div>
                     <div class="min-w-full h-full relative">
-                        <img src="assets/img/slides/dashboard-asamblea.jpg" class="w-full h-full object-cover" alt="Asamblea">
+                        <picture class="block w-full h-full"><source type="image/webp" srcset="assets/img/slides/dashboard-asamblea.webp"><img src="assets/img/slides/dashboard-asamblea.jpg" class="w-full h-full object-cover" alt="Asamblea" decoding="async"></picture>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6"><h2 class="text-white text-2xl font-bold">Recuerda asistir a nuestra Asamblea General.</h2></div>
                     </div>
                 </div>

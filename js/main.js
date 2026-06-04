@@ -69,6 +69,8 @@ async function loadData(forceRefresh = false) {
         toggleActionButtons(false);
     } finally {
         State.setIsFetching(false);
+        // Quita los skeletons cuando ya no estamos esperando datos (no en pleno polling).
+        if (!State.getPollingInterval()) document.body.classList.remove('loading');
     }
 }
 

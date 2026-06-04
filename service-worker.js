@@ -6,7 +6,7 @@
 // La versión nueva NO se activa sola: avisa al usuario con un aviso "Actualizar"
 // (ver js/sw-register.js) para no interrumpir un formulario a medio llenar.
 
-const APP_VERSION = 'v3-2026-06-03';            // súbela al desplegar cambios grandes
+const APP_VERSION = 'v4-2026-06-03';            // súbela al desplegar cambios grandes
 const SHELL_CACHE = `sac-shell-${APP_VERSION}`;
 const IMG_CACHE   = `sac-img-${APP_VERSION}`;
 

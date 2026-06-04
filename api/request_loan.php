@@ -2,6 +2,8 @@
 // api/request_loan.php
 session_start();
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/csrf.php';
+csrf_require(); // CSRF: bloquea POST sin token válido
 
 header('Content-Type: application/json; charset=utf-8');
 
