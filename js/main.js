@@ -16,7 +16,7 @@ function resetInactivityTimer() {
     inactivityTimer = setTimeout(() => {
         State.clearPollingInterval();
         window.location.href = 'logout.php?status=inactive';
-    }, 600000); 
+    }, 7200000); // 2 horas de inactividad
 }
 
 async function loadData(forceRefresh = false) {
@@ -378,6 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('refresh-data-btn')?.addEventListener('click', () => {
         State.clearPollingInterval();
+        document.body.classList.add('loading'); // re-mostrar los skeletons al actualizar
         loadData(true);
     });
     
