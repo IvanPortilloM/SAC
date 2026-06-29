@@ -1,0 +1,14 @@
+# Dependencias de Node (solo se usan para compilar el CSS, no se suben al servidor)
+node_modules/
+
+# Variables de entorno con credenciales — NUNCA subir
+.env
+.env.*
+
+# Logs
+*.log
+error_log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db

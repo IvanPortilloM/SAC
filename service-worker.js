@@ -1,57 +1,89 @@
-// service-worker.js
-const CACHE_NAME = 'portal-sac-v2';
-const urlsToCache = [
-  './',
+// service-worker.js  —  Portal SAC ADIGGM
+// Estrategia:
+//   · SHELL (HTML/JS/CSS):  network-first  -> tus cambios se ven SIEMPRE que haya red.
+//   · IMÁGENES:             cache-first    -> carga instantánea en visitas repetidas.
+//   · /api/ (financiero):   nunca se cachea -> los saldos siempre son reales.
+// La versión nueva NO se activa sola: avisa al usuario con un aviso "Actualizar"
+// (ver js/sw-register.js) para no interrumpir un formulario a medio llenar.
+
+const APP_VERSION = 'v4-2026-06-03';            // súbela al desplegar cambios grandes
+const SHELL_CACHE = `sac-shell-${APP_VERSION}`;
+const IMG_CACHE   = `sac-img-${APP_VERSION}`;
+
+// Mínimo para que la app abra sin conexión.
+const SHELL_ASSETS = [
   './login.html',
   './manifest.json',
-  './favicon.ico',
+  './css/styles.css',
   './LOGO ADI-GGM.png',
   './assets/img/icon-192.png',
   './assets/img/icon-512.png'
 ];
 
-// Instalar el Service Worker y guardar los archivos base
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(SHELL_CACHE).then((cache) =>
+      // addAll falla si UN archivo no está; lo hacemos tolerante.
+      Promise.allSettled(SHELL_ASSETS.map((url) => cache.add(url)))
+    )
   );
-  self.skipWaiting();
+  // OJO: no llamamos skipWaiting aquí. Esperamos la confirmación del usuario.
 });
 
-// Limpiar cachés antiguos si actualizas la versión (v3, v4...)
-self.addEventListener('activate', event => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.filter(name => name !== CACHE_NAME)
-          .map(name => caches.delete(name))
-      );
-    })
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((k) => k !== SHELL_CACHE && k !== IMG_CACHE)
+            .map((k) => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Estrategia: "Network First, falling back to cache"
-self.addEventListener('fetch', event => {
-  // Solo interceptar peticiones GET (no tocamos los envíos de formularios POST)
-  if (event.request.method !== 'GET') return;
+// El cliente confirma "Actualizar" -> activamos la versión nueva de inmediato.
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
 
+const isImage = (url) => /\.(png|jpe?g|gif|webp|avif|svg|ico)$/i.test(url.pathname);
+
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  if (req.method !== 'GET') return;                    // no tocar POST (formularios)
+
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;     // dejar pasar CDNs/externos
+  if (url.pathname.includes('/api/')) return;          // datos financieros: siempre frescos
+
+  // IMÁGENES -> cache-first
+  if (isImage(url)) {
+    event.respondWith(
+      caches.match(req).then((cached) =>
+        cached || fetch(req).then((res) => {
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(IMG_CACHE).then((c) => c.put(req, copy));
+          }
+          return res;
+        }).catch(() => cached)
+      )
+    );
+    return;
+  }
+
+  // SHELL (HTML/JS/CSS) -> network-first, con respaldo del caché si no hay red.
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Si hay internet, guardamos una copia fresca en el caché en secreto
-        const responseClone = response.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseClone);
-        });
-        return response;
-      })
-      .catch(() => {
-        // Si falla la red (Modo Avión / Sin Señal), mostramos lo que tengamos guardado
-        return caches.match(event.request);
-      })
+    fetch(req).then((res) => {
+      if (res && res.status === 200) {
+        const copy = res.clone();
+        caches.open(SHELL_CACHE).then((c) => c.put(req, copy));
+      }
+      return res;
+    }).catch(() =>
+      caches.match(req).then((cached) => cached || caches.match('./login.html'))
+    )
   );
 });

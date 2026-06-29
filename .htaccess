@@ -1,0 +1,97 @@
+# ============================================================
+#  Portal SAC - ADIGGM  |  Configuración Apache
+#  Compresión + Caché inteligente + Cabeceras de seguridad
+# ============================================================
+
+Options -Indexes
+
+# ------------------------------------------------------------
+# 1. COMPRESIÓN  (reduce el peso transferido 60-80%)
+# ------------------------------------------------------------
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css application/json application/javascript text/javascript application/xml image/svg+xml application/manifest+json
+</IfModule>
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css application/json application/javascript text/javascript application/xml image/svg+xml application/manifest+json
+</IfModule>
+
+# ------------------------------------------------------------
+# 2. CONTROL DE CACHÉ  (el núcleo del problema de "no se ven los cambios")
+# ------------------------------------------------------------
+<IfModule mod_headers.c>
+
+  # 2a. CÓDIGO (HTML, JS, CSS, manifest): el navegador SIEMPRE revalida.
+  #     Guarda una copia, pero en cada carga pregunta al servidor "¿cambió?".
+  #       - Si NO cambió  -> respuesta 304 (vacía, instantánea).
+  #       - Si SÍ cambió  -> descarga la versión nueva.
+  #     >>> Por esto tus cambios se ven al instante sin borrar caché. <<<
+  <FilesMatch "\.(html|js|mjs|css|json|webmanifest)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+
+  # 2b. El Service Worker NUNCA debe quedar cacheado, o las actualizaciones
+  #     dejarían de propagarse a los dispositivos.
+  <FilesMatch "service-worker\.js$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+
+  # 2c. IMÁGENES, ÍCONOS y FUENTES: caché larga (rara vez cambian = más velocidad).
+  #     Si cambias una imagen, renómbrala o súbele un ?v=2 en el HTML.
+  <FilesMatch "\.(jpg|jpeg|png|gif|webp|avif|svg|ico|woff|woff2|ttf|eot)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+</IfModule>
+
+# ------------------------------------------------------------
+# 3. CABECERAS DE SEGURIDAD
+# ------------------------------------------------------------
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "geolocation=(), microphone=(), camera=(self)"
+
+  # HSTS: fuerza HTTPS en el navegador (solo se envía si la conexión ya es HTTPS).
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on'"
+
+  # Content-Security-Policy: permisiva pero útil. Permite los orígenes que usa la app.
+  # (cdnjs = jsPDF bajo demanda · Google Fonts · api.adiggm.hn = verificación de ID en
+  #  el registro · img https:/blob: = fotos de noticias y vistas previas de cámara)
+  Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://api.adiggm.hn; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+</IfModule>
+
+# ------------------------------------------------------------
+# 4. PROTEGER ARCHIVOS SENSIBLES (no servirlos nunca por HTTP)
+# ------------------------------------------------------------
+# Bloquea archivos ocultos (.env, .git, etc.)
+<FilesMatch "^\.">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Bloquea logs, configs de build y dependencias
+<FilesMatch "(\.env|\.log|error_log|\.md|\.lock|package(-lock)?\.json|.*\.config\.js)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Bloquea acceso web directo a carpetas internas (se incluyen vía PHP, no se navegan)
+RewriteEngine On
+RewriteRule ^(config|PHPMailer|node_modules|src)/ - [F,L]
+
+# ------------------------------------------------------------
+# 5. (OPCIONAL) Forzar HTTPS — descomenta solo si tu sitio ya tiene certificado SSL
+# ------------------------------------------------------------
+# RewriteCond %{HTTPS} off
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

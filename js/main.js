@@ -1,10 +1,13 @@
-import * as API from './modules/api.js';
-import * as UI from './modules/ui.js';
-import * as State from './modules/state.js';
-import * as Loans from './modules/loans.js';
-import { formatNumber } from './modules/utils.js';
-import { generateStatementPDF } from './modules/pdf.js';
-import { toggleActionButtons, updateDashboardHeader, updateFinancialCards } from './modules/ui.js';
+// El ?v=13 fuerza la actualización de los módulos UNA vez tras este despliegue.
+// A partir de ahora, las cabeceras no-cache del .htaccess actualizan los módulos
+// automáticamente al editarlos: no necesitas volver a cambiar estos números.
+import * as API from './modules/api.js?v=13';
+import * as UI from './modules/ui.js?v=13';
+import * as State from './modules/state.js?v=13';
+import * as Loans from './modules/loans.js?v=13';
+import { formatNumber } from './modules/utils.js?v=13';
+import { generateStatementPDF } from './modules/pdf.js?v=13';
+import { toggleActionButtons, updateDashboardHeader, updateFinancialCards } from './modules/ui.js?v=13';
 
 let inactivityTimer;
 
@@ -13,7 +16,7 @@ function resetInactivityTimer() {
     inactivityTimer = setTimeout(() => {
         State.clearPollingInterval();
         window.location.href = 'logout.php?status=inactive';
-    }, 600000); 
+    }, 7200000); // 2 horas de inactividad
 }
 
 async function loadData(forceRefresh = false) {
@@ -66,6 +69,8 @@ async function loadData(forceRefresh = false) {
         toggleActionButtons(false);
     } finally {
         State.setIsFetching(false);
+        // Quita los skeletons cuando ya no estamos esperando datos (no en pleno polling).
+        if (!State.getPollingInterval()) document.body.classList.remove('loading');
     }
 }
 
@@ -239,6 +244,75 @@ async function loadFAQs() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    
+    const btnWhatsApp = document.getElementById('btn-vincular-whatsapp');
+    
+    if(btnWhatsApp) {
+        btnWhatsApp.addEventListener('click', async () => {
+            const statusMsg = document.getElementById('whatsapp-status');
+            const txtIdentidad = document.getElementById('profile-identidad').value;
+
+            // Mostramos el mensaje para saber que el botón SÍ se presionó
+            statusMsg.classList.remove('hidden');
+
+            if(!txtIdentidad) {
+                statusMsg.innerHTML = '❌ <b>Error:</b> El campo de identidad está vacío. Por favor llénalo.';
+                statusMsg.className = 'text-sm text-center mt-3 text-red-500 font-bold';
+                // Alerta nativa para forzar al móvil a mostrar el error
+                alert("Falta tu número de identidad en el perfil.");
+                return;
+            }
+
+            // Cambiamos el estado del botón
+            btnWhatsApp.disabled = true;
+            btnWhatsApp.innerHTML = '⏳ Conectando...';
+            statusMsg.innerHTML = 'Generando token seguro...';
+            statusMsg.className = 'text-sm text-center mt-3 text-blue-600 font-medium';
+
+            try {
+                const response = await fetch('api/generar_token.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Identidad: txtIdentidad })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    const token = data.token; 
+                    const NUMERO_DEL_BOT = "50489831800"; // <-- VERIFICA TU NÚMERO AQUÍ
+                    
+                    // Usamos el protocolo universal de deep-linking de WhatsApp
+                    const urlMagica = `https://wa.me/${NUMERO_DEL_BOT}?text=Token:%20${token}`;
+
+                    statusMsg.innerHTML = `✅ Token <b>${token}</b> generado. Abriendo WhatsApp...`;
+                    statusMsg.className = 'text-sm text-center mt-3 text-green-600 font-bold';
+                    
+                    // LA MAGIA PARA MÓVILES: Redirección en la misma pestaña en lugar de _blank
+                    setTimeout(() => {
+                        window.location.href = urlMagica;
+                    }, 500); // Medio segundo de pausa para que el usuario alcance a leer el éxito
+
+                } else {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+            } catch (error) {
+                statusMsg.innerHTML = `❌ <b>Error técnico:</b> ${error.message}`;
+                statusMsg.className = 'text-sm text-center mt-3 text-red-600 font-bold';
+                alert("Ocurrió un error: " + error.message);
+            } finally {
+                btnWhatsApp.disabled = false;
+                btnWhatsApp.innerHTML = 'Generar Enlace de WhatsApp';
+            }
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
     loadData(false);
     loadNotifications();
     loadNews();
@@ -304,6 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('refresh-data-btn')?.addEventListener('click', () => {
         State.clearPollingInterval();
+        document.body.classList.add('loading'); // re-mostrar los skeletons al actualizar
         loadData(true);
     });
     

@@ -8,15 +8,8 @@ require 'PHPMailer/Exception.php';
 require 'PHPMailer/PHPMailer.php';
 require 'PHPMailer/SMTP.php';
 
-if (file_exists(__DIR__ . '/config/env_loader.php')) {
-    require_once __DIR__ . '/config/env_loader.php';
-} else {
-    error_log("Error Crítico: No se encuentra config/env_loader.php");
-    die("Error interno del servidor.");
-}
-
-// Cargar variables de entorno (asume que .env está en la raíz)
-loadEnv(__DIR__ . '/.env');
+// db.php ya carga las variables de entorno (.env) por nosotros.
+require_once __DIR__ . '/config/db.php';
 
 $dsn = "mysql:host=" . getenv('DB_HOST') . ";dbname=" . getenv('DB_NAME_PORTAL') . ";charset=utf8";
 try {
